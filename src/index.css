@@ -1,0 +1,104 @@
+@import "tailwindcss";
+
+body {
+  margin: 0;
+  background: #f6f8f5;
+  color: #123b2d;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Custom High-Fidelity Kitchen Camera Animations */
+
+/* 1. CCTV Scanlines and Vignette Flicker */
+@keyframes cctv-flicker {
+  0%, 100% { opacity: 0.98; }
+  50% { opacity: 1.0; }
+  93% { opacity: 0.99; }
+  94% { opacity: 0.85; }
+  95% { opacity: 1.0; }
+}
+
+.animate-cctv-flicker {
+  animation: cctv-flicker 4s infinite ease-in-out;
+}
+
+/* 2. Sweeping Laser Scanner */
+@keyframes scan-sweep {
+  0% { transform: translateY(-10%); }
+  50% { transform: translateY(280px); }
+  100% { transform: translateY(-10%); }
+}
+
+.animate-scan-sweep {
+  animation: scan-sweep 6s infinite linear;
+}
+
+/* 3. Heat Stove Flame */
+@keyframes flame-pulse {
+  0%, 100% { transform: scale(1) rotate(-45deg); opacity: 0.85; filter: brightness(1); }
+  50% { transform: scale(1.15) rotate(-45deg); opacity: 1; filter: brightness(1.25); }
+}
+
+.animate-flame {
+  animation: flame-pulse 0.6s infinite ease-in-out;
+}
+
+/* 4. Rising Cooking Steam */
+@keyframes steam-rise {
+  0% {
+    transform: translateY(0) scale(0.8) rotate(0deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.4;
+  }
+  50% {
+    transform: translateY(-25px) scale(1.2) rotate(15deg);
+    opacity: 0.2;
+    filter: blur(2px);
+  }
+  100% {
+    transform: translateY(-50px) scale(1.6) rotate(30deg);
+    opacity: 0;
+    filter: blur(4px);
+  }
+}
+
+.animate-steam-1 {
+  animation: steam-rise 2.5s infinite ease-out;
+}
+.animate-steam-2 {
+  animation: steam-rise 3s infinite ease-out 1s;
+}
+.animate-steam-3 {
+  animation: steam-rise 2.8s infinite ease-out 0.5s;
+}
+
+/* 5. Overhead Chef Chopping/Stirring motion */
+@keyframes chef-working {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(4deg) translateY(1px); }
+}
+
+.animate-chef-work {
+  animation: chef-working 0.8s infinite ease-in-out;
+}
+
+@keyframes chef-head-sway {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(1px, -1px); }
+}
+
+.animate-chef-head {
+  animation: chef-head-sway 1.6s infinite ease-in-out;
+}
+
+/* 6. Grill Heat Wave Distortion Effect */
+@keyframes heat-haze {
+  0%, 100% { filter: blur(0.5px) brightness(1); }
+  50% { filter: blur(1.2px) brightness(1.05); }
+}
+
+.animate-grill-heat {
+  animation: heat-haze 1.2s infinite ease-in-out;
+}
