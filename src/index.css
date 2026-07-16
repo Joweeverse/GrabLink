@@ -277,3 +277,18 @@ code, pre, .font-mono {
   background-position: right center;
   box-shadow: 0 0 15px rgba(0, 255, 163, 0.4);
 }
+
+/* 12. Flickering LIVE indicator effect for CCTV */
+@keyframes live-flicker {
+  0%, 100% { opacity: 1; }
+  35% { opacity: 0.9; }
+  38% { opacity: 0.4; }
+  40% { opacity: 0.85; }
+  72% { opacity: 0.95; }
+  74% { opacity: 0.25; }
+  76% { opacity: 0.9; }
+}
+
+.animate-flicker {
+  animation: live-flicker 2.5s infinite;
+}

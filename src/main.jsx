@@ -27,9 +27,15 @@ import {
   AlertTriangle,
   Zap,
   Info,
-  ShieldCheck
+  ShieldCheck,
+  Menu,
+  Car,
+  Gauge,
+  Package,
+  BarChart3
 } from 'lucide-react'
 import './index.css'
+import cctvKitchenFeed from './cctv_kitchen_feed.jpg'
 
 // Initial Order Data representing G1246, G1245, G1247, G1249 (Context-aware for McDonald's Orchard Road)
 const initialOrders = [
@@ -141,6 +147,42 @@ function App() {
   const [selectedLocation, setSelectedLocation] = useState("McDonald's - Orchard Road")
   const [orders, setOrders] = useState(() => JSON.parse(JSON.stringify(locationsConfig["McDonald's - Orchard Road"].initialOrders)))
   const [speed, setSpeed] = useState(2) // 1: Slow, 2: Normal, 3: Fast
+
+  // Ecosystem preview phase states
+  const [activePreviewPhase, setActivePreviewPhase] = useState(null)
+  const [registeredPhases, setRegisteredPhases] = useState({})
+  
+  // Phase 2: Parking Intelligence Sandbox State
+  const [parkingBays, setParkingBays] = useState([
+    { id: 1, name: "Bay A1", status: "Occupied" },
+    { id: 2, name: "Bay A2", status: "Vacant" },
+    { id: 3, name: "Bay B1", status: "Occupied" },
+    { id: 4, name: "Bay B2", status: "Occupied" },
+    { id: 5, name: "Bay C1", status: "Vacant" },
+    { id: 6, name: "Bay C2", status: "Vacant" }
+  ])
+
+  const toggleBay = (id) => {
+    setParkingBays(prev => prev.map(bay => bay.id === id ? { ...bay, status: bay.status === "Occupied" ? "Vacant" : "Occupied" } : bay))
+  }
+
+  // Phase 3: Driver Safety AI Sandbox State
+  const [safetyViolationSimulated, setSafetyViolationSimulated] = useState(false)
+
+  // Phase 4: Smart Pickup Hubs Sandbox State
+  const [lockerStatus, setLockerStatus] = useState({ A01: "Locked", A02: "Locked", B01: "Locked" })
+
+  // Phase 5: Logistics Analytics Sandbox State
+  const [isAnalyticsRunning, setIsAnalyticsRunning] = useState(false)
+  const [analyticsReport, setAnalyticsReport] = useState(null)
+  
+  // Mobile navigation state
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+
+  // Dynamic Simulator States
+  const [kitchenLoadSeverity, setKitchenLoadSeverity] = useState("Normal") // Normal, Rush Hour, Kitchen Backlog
+  const [riderProximity, setRiderProximity] = useState(2.5) // from 1 km to 5 km
+  const [manualOverride, setManualOverride] = useState(false) // Toggle manual dispatch override
   
   // Dynamic Real-time States for Vision Analytics & Camera Overlay
   const [inferenceTime, setInferenceTime] = useState(12)
@@ -224,6 +266,9 @@ function App() {
   const ordersRef = useRef(orders)
   const isDispatchedRef = useRef(isDispatched)
   const isRefreshingRef = useRef(isRefreshing)
+  const kitchenLoadSeverityRef = useRef(kitchenLoadSeverity)
+  const riderProximityRef = useRef(riderProximity)
+  const manualOverrideRef = useRef(manualOverride)
 
   useEffect(() => {
     countdownRef.current = countdown
@@ -244,6 +289,18 @@ function App() {
   useEffect(() => {
     isRefreshingRef.current = isRefreshing
   }, [isRefreshing])
+
+  useEffect(() => {
+    kitchenLoadSeverityRef.current = kitchenLoadSeverity
+  }, [kitchenLoadSeverity])
+
+  useEffect(() => {
+    riderProximityRef.current = riderProximity
+  }, [riderProximity])
+
+  useEffect(() => {
+    manualOverrideRef.current = manualOverride
+  }, [manualOverride])
 
   // Synchronize orders, riderSavedMinutes, and metrics history back to cache whenever they change
   useEffect(() => {
@@ -498,29 +555,40 @@ function App() {
       }
 
       // Calculate countdown dynamically based on cooking progress:
-      // Auto dispatch is triggered exactly 2 minutes before the oldest cooking order is ready!
       const currentlyDispatched = isDispatchedRef.current
+      const currentOverride = manualOverrideRef.current
 
       if (currentlyDispatched) {
         setCountdown(0)
+      } else if (currentOverride) {
+        // Freeze countdown ticking in manual override state
+        setCountdown(prev => prev)
       } else {
         const cooking = updatedOrders.filter(o => o.stage === 'Cooking')
+        const currentSeverity = kitchenLoadSeverityRef.current
+        const proximity = riderProximityRef.current
+        
+        let severityFactor = 1.0
+        if (currentSeverity === "Rush Hour") severityFactor = 1.15
+        else if (currentSeverity === "Kitchen Backlog") severityFactor = 1.35
+
         if (cooking.length > 0) {
           // Sort descending to get the oldest (closest to complete) cooking order
           const oldest = cooking.sort((a, b) => b.progress - a.progress)[0]
           const currentSpeed = speedRef.current
           const activeFactor = currentSpeed === 1 ? 1.25 : currentSpeed === 3 ? 0.75 : 1.0
-          const scaledAiTime = Math.max(1, Math.round(oldest.aiBaseTime * activeFactor))
+          const scaledAiTime = Math.max(1, Math.round(oldest.aiBaseTime * activeFactor * severityFactor))
           const increment = currentSpeed === 3 ? 3 : currentSpeed === 1 ? 1 : 2
 
-          // Dispatch happens at the threshold where remaining cooking time is 2 minutes
-          const dispatchProgressThreshold = ((scaledAiTime - 2) / scaledAiTime) * 100
+          // Dynamic rider proximity buffer: longer distance requires earlier dispatch
+          const proximityBuffer = proximity * 1.5 // 1.5 minutes buffer per km
+          const dispatchProgressThreshold = ((scaledAiTime - proximityBuffer) / scaledAiTime) * 100
           const remainingProgress = dispatchProgressThreshold - oldest.progress
           const timeUntilDispatch = Math.max(0, Math.ceil(remainingProgress / increment))
           
           setCountdown(timeUntilDispatch)
 
-          // If remaining cook time is <= 2 minutes (progress meets or exceeds threshold), auto dispatch!
+          // If remaining cook time is <= buffer, auto dispatch!
           if (oldest.progress >= dispatchProgressThreshold) {
             dispatchOrder(true, oldest.id)
           }
@@ -531,8 +599,9 @@ function App() {
             const firstQueued = queued[0]
             const currentSpeed = speedRef.current
             const activeFactor = currentSpeed === 1 ? 1.25 : currentSpeed === 3 ? 0.75 : 1.0
-            const scaledAiTime = Math.max(1, Math.round(firstQueued.aiBaseTime * activeFactor))
-            setCountdown(Math.max(0, Math.round((scaledAiTime - 2) * 60)))
+            const scaledAiTime = Math.max(1, Math.round(firstQueued.aiBaseTime * activeFactor * severityFactor))
+            const proximityBuffer = proximity * 1.5
+            setCountdown(Math.max(0, Math.round((scaledAiTime - proximityBuffer) * 60)))
           } else {
             setCountdown(0)
           }
@@ -762,14 +831,33 @@ function App() {
   const activeOrdersCount = orders.length
   const kitchenLoad = useMemo(() => {
     if (activeOrdersCount === 0) return 30
-    return Math.min(99, Math.max(35, 50 + activeOrdersCount * 8 + (isLunchRush ? 15 : 0)))
-  }, [activeOrdersCount, isLunchRush])
+    let severityOverhead = 0
+    if (kitchenLoadSeverity === "Rush Hour") severityOverhead = 20
+    else if (kitchenLoadSeverity === "Kitchen Backlog") severityOverhead = 40
+    return Math.min(99, Math.max(35, 50 + activeOrdersCount * 8 + (isLunchRush ? 15 : 0) + severityOverhead))
+  }, [activeOrdersCount, isLunchRush, kitchenLoadSeverity])
 
   const etaConfidence = useMemo(() => {
-    if (kitchenLoad > 85) return 92
-    if (kitchenLoad < 60) return 96
-    return locationsConfig[selectedLocation].baseConfidence
-  }, [kitchenLoad, selectedLocation])
+    let score = locationsConfig[selectedLocation].baseConfidence
+    
+    // 1. Kitchen Load Severity impact
+    if (kitchenLoadSeverity === "Rush Hour") {
+      score -= 5
+    } else if (kitchenLoadSeverity === "Kitchen Backlog") {
+      score -= 12
+    }
+    
+    // 2. Rider Proximity impact (1km to 5km, base 2.5km)
+    const proximityDelta = riderProximity - 2.5
+    score -= Math.round(proximityDelta * 4) // -4% per km above 2.5, +4% per km below 2.5
+    
+    // 3. Manual Dispatch Override impact
+    if (manualOverride) {
+      score -= 6
+    }
+    
+    return Math.min(99, Math.max(50, score))
+  }, [selectedLocation, kitchenLoadSeverity, riderProximity, manualOverride])
 
   const financialROI = useMemo(() => {
     return (riderSavedMinutes * 3.50).toFixed(2)
@@ -896,8 +984,8 @@ function App() {
   const strokeDashoffset = strokeCircumference - (circleProgressPct / 100) * strokeCircumference
 
   // Clock display logic for countdown ring
-  const displayMin = String(Math.floor(countdown / 60)).padStart(2, '0')
-  const displaySec = String(countdown % 60).padStart(2, '0')
+  const displayMin = manualOverride ? "MAN" : String(Math.floor(countdown / 60)).padStart(2, '0')
+  const displaySec = manualOverride ? "UAL" : String(countdown % 60).padStart(2, '0')
 
   // Generate dynamic timestamps for the CCTV overlay
   const cctvTimeStr = useMemo(() => {
@@ -938,22 +1026,39 @@ function App() {
       <div className="absolute top-[10%] left-[5%] w-[450px] h-[450px] rounded-full bg-[#00E5FF] filter blur-[150px] opacity-[0.08] pointer-events-none animate-orb-1 z-0"></div>
       <div className="absolute bottom-[10%] right-[5%] w-[500px] h-[500px] rounded-full bg-[#00FFA3] filter blur-[160px] opacity-[0.05] pointer-events-none animate-orb-2 z-0"></div>
 
+      {/* Mobile Sidebar Overlay */}
+      {isSidebarOpen && (
+        <div 
+          onClick={() => setIsSidebarOpen(false)}
+          className="fixed inset-0 z-35 bg-black/60 backdrop-blur-sm md:hidden"
+        />
+      )}
+
       {/* 1. LEFT GLOBAL SIDEBAR */}
-      <aside className="fixed bottom-0 top-0 left-0 hidden w-64 glass-sidebar p-6 md:block z-40">
+      <aside className={`fixed bottom-0 top-0 left-0 w-64 glass-sidebar p-6 z-40 transition-all duration-300 md:translate-x-0 ${
+        isSidebarOpen ? 'translate-x-0 block' : '-translate-x-full hidden md:block'
+      }`}>
         <div className="flex flex-col h-full justify-between">
           <div className="space-y-8">
             
             {/* Sense Logo Header */}
-            <div className="flex items-center gap-3">
-              <LogoIcon className="h-11 w-11" />
-              <div>
-                <span className="text-lg font-black tracking-tight text-white block leading-none">
-                  Grab<span className="bg-gradient-to-r from-[#00E5FF] to-[#00FFA3] bg-clip-text text-transparent font-extrabold">Sense</span>
-                </span>
-                <span className="block text-[7.5px] font-black tracking-widest text-[#00FFA3] uppercase mt-1.5 leading-none font-mono">
-                  Link Smarter, Move Faster
-                </span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <LogoIcon className="h-11 w-11" />
+                <div>
+                  <span className="bg-gradient-to-r from-[#00E5FF] to-[#00FFA3] bg-clip-text text-transparent font-extrabold">Sense</span>
+                  <span className="block text-[7.5px] font-black tracking-widest text-[#00FFA3] uppercase mt-1.5 leading-none font-mono">
+                    Link Smarter, Move Faster
+                  </span>
+                </div>
               </div>
+              <button 
+                onClick={() => setIsSidebarOpen(false)}
+                className="md:hidden p-1.5 rounded-lg border border-white/10 bg-white/[0.02] hover:bg-white/[0.08] text-slate-400 focus:outline-none cursor-pointer"
+                aria-label="Close sidebar menu"
+              >
+                <X className="h-4.5 w-4.5" />
+              </button>
             </div>
 
             {/* Navigation Section */}
@@ -963,7 +1068,7 @@ function App() {
                 <div className="space-y-1.5">
                   
                   {/* Phase 1: Active */}
-                  <button className="flex w-full items-center justify-between rounded-xl bg-[#00E5FF]/10 border border-[#00E5FF]/20 px-3.5 py-2.5 text-xs font-bold text-white transition hover:bg-[#00E5FF]/15">
+                  <button className="flex w-full items-center justify-between rounded-xl bg-[#00E5FF]/10 border border-[#00E5FF]/20 px-3.5 py-2.5 text-xs font-bold text-white transition hover:bg-[#00E5FF]/15 cursor-pointer">
                     <div className="flex items-center gap-2.5">
                       <ChefHat className="h-4 w-4 text-[#00E5FF]" />
                       <span>Phase 1: Kitchen Readiness</span>
@@ -971,21 +1076,36 @@ function App() {
                     <ChevronRight className="h-3.5 w-3.5 text-[#00E5FF]" />
                   </button>
 
-                  {/* Locked Modules with premium encrypted style */}
+                  {/* Locked Modules with premium interactive preview style */}
                   {[
-                    { title: "Phase 2: Parking Intelligence", step: "LOCKED" },
-                    { title: "Phase 3: Driver Safety AI", step: "LOCKED" },
-                    { title: "Phase 4: Smart Pickup Hubs", step: "LOCKED" },
-                    { title: "Phase 5: Logistics Analytics", step: "LOCKED" }
-                  ].map((phase, idx) => (
-                    <div key={idx} className="flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-xs font-medium text-slate-500 border border-transparent cursor-not-allowed transition hover:bg-white/[0.02]">
-                      <div className="flex items-center gap-2.5">
-                        <Lock className="h-3.5 w-3.5 opacity-55" />
-                        <span className="opacity-75">{phase.title}</span>
-                      </div>
-                      <span className="rounded bg-white/[0.04] border border-white/5 px-1.5 py-0.5 text-[7px] font-bold tracking-wider text-slate-400">{phase.step}</span>
-                    </div>
-                  ))}
+                    { id: 2, title: "Phase 2: Parking Intelligence", subtitle: "Edge parking telemetry", icon: Car },
+                    { id: 3, title: "Phase 3: Driver Safety AI", subtitle: "Vision safety scans", icon: ShieldCheck },
+                    { id: 4, title: "Phase 4: Smart Pickup Hubs", subtitle: "IoT thermal lockers", icon: Package },
+                    { id: 5, title: "Phase 5: Logistics Analytics", subtitle: "ML payout arbitrage", icon: BarChart3 }
+                  ].map((phase) => {
+                    const PhaseIcon = phase.icon;
+                    return (
+                      <button 
+                        key={phase.id} 
+                        onClick={() => {
+                          setActivePreviewPhase(phase.id);
+                          setIsSidebarOpen(false); // Close sidebar on mobile after selection
+                        }}
+                        className="flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-xs font-medium text-slate-300 border border-white/5 bg-white/[0.01] hover:bg-white/[0.04] hover:border-white/10 transition cursor-pointer text-left group"
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <Lock className="h-3.5 w-3.5 text-[#00FFA3]/60 group-hover:text-[#00FFA3] transition-colors" />
+                          <div>
+                            <span className="font-bold text-white block group-hover:text-[#00E5FF] transition-colors">{phase.title}</span>
+                            <span className="text-[9px] text-slate-400 block mt-0.5 line-clamp-1">{phase.subtitle}</span>
+                          </div>
+                        </div>
+                        <span className="rounded bg-[#00FFA3]/10 border border-[#00FFA3]/20 px-1.5 py-0.5 text-[7px] font-bold tracking-wider text-[#00FFA3] whitespace-nowrap animate-pulse group-hover:bg-[#00FFA3]/20 group-hover:border-[#00FFA3]/40 transition-colors">
+                          PREVIEW
+                        </span>
+                      </button>
+                    );
+                  })}
 
                 </div>
               </div>
@@ -1033,6 +1153,13 @@ function App() {
         {/* 2. TOP BAR */}
         <header className="sticky top-0 z-30 flex h-16 items-center justify-between glass-header px-6 md:px-10">
           <div className="flex items-center gap-2.5">
+            <button 
+              onClick={() => setIsSidebarOpen(true)}
+              className="md:hidden p-1.5 rounded-lg border border-white/10 bg-white/[0.02] hover:bg-white/[0.08] text-slate-300 hover:text-white transition cursor-pointer flex items-center justify-center mr-1"
+              aria-label="Open navigation menu"
+            >
+              <Menu className="h-4.5 w-4.5 text-[#00E5FF]" />
+            </button>
             <div className="md:hidden">
               <LogoIcon className="h-9 w-9" />
             </div>
@@ -1274,198 +1401,118 @@ function App() {
                 {/* THE VIEW SCREEN */}
                 {viewMode === "cctv" ? (
                   /* CCTV CAMERA STREAM VIEW */
-                  <div className="relative h-[290px] overflow-hidden rounded-xl bg-[#090F0C] text-white shadow-2xl font-mono border border-[#00E5FF]/10 animate-cctv-flicker">
+                  <div className="relative h-[290px] overflow-hidden rounded-xl bg-[#030907] text-white shadow-2xl font-mono border border-emerald-500/20 animate-cctv-flicker">
+                    {/* Looping CCTV Camera Feed Image Background */}
+                    <img 
+                      src={cctvKitchenFeed} 
+                      alt="Live CCTV Kitchen Feed" 
+                      className="absolute inset-0 h-full w-full object-cover opacity-60 mix-blend-luminosity brightness-75 contrast-125 filter hue-rotate-60 saturate-[0.8] pointer-events-none"
+                    />
+
+                    {/* High-tech HUD Matrix overlays */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#020e0a]/90 via-[#01140f]/20 to-[#020e0a]/60 pointer-events-none" />
+
+                    {/* Camera scan lines and crosshair grid */}
+                    <div className="absolute inset-0 pointer-events-none opacity-[0.12] mix-blend-overlay" style={{
+                      backgroundImage: 'repeating-linear-gradient(0deg, #00E5FF, #00E5FF 2px, transparent 2px, transparent 4px)'
+                    }} />
                     
-                    {/* Kitchen Tiling floor lines (CSS Gradients) */}
-                    <div className="absolute inset-0 opacity-[0.03]" style={{
-                      backgroundImage: `
-                        radial-gradient(#202923 1px, transparent 1px),
-                        repeating-linear-gradient(0deg, transparent, transparent 19px, #000 19px, #000 20px),
-                        repeating-linear-gradient(90deg, transparent, transparent 19px, #000 19px, #000 20px)
-                      `,
-                      backgroundSize: '20px 20px'
-                    }} />
-
-                    {/* CCTV Text Overlay */}
-                    <div className="absolute left-4 top-4 z-20 flex flex-col text-[8px] tracking-wide text-white/70 leading-3 bg-black/50 backdrop-blur-sm border border-white/5 px-2.5 py-1.5 rounded">
-                      <div className="flex items-center gap-1 text-red-500 font-black">
-                        <span className="h-1.5 w-1.5 rounded-full bg-red-600 animate-pulse"></span>
-                        <span>CCTV REC</span>
+                    {/* Centered crosshair */}
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-40">
+                      <div className="h-6 w-6 border border-emerald-500/30 rounded-full flex items-center justify-center">
+                        <div className="h-1.5 w-1.5 bg-emerald-400 rounded-full"></div>
                       </div>
-                      <span className="text-[7.5px] mt-0.5 text-slate-400">CAM-01 / PREP_FLOOR</span>
-                      <span className="text-[7.5px] text-slate-400">2026-07-15 {cctvTimeStr}</span>
-                      <span className="text-[7.5px] text-[#00FFA3] font-bold">LATENCY: {cctvLatency}s | FPS: {cctvFps}</span>
+                      <div className="absolute h-10 w-[1px] bg-emerald-500/30"></div>
+                      <div className="absolute w-10 h-[1px] bg-emerald-500/30"></div>
                     </div>
 
-                    {/* 1. WOK STATION (Dynamic Cook details based on orders) */}
-                    <div className="absolute left-[5%] top-[15%] w-[150px] h-[135px] rounded-lg bg-gradient-to-br from-slate-700 via-slate-600 to-slate-800 border border-slate-600 shadow-[0_12px_24px_rgba(0,0,0,0.5)] p-2 flex flex-col justify-between">
-                      <div className="flex items-center justify-around w-full">
-                        
-                        {/* Burner 1 */}
-                        <div className="relative h-12 w-12 rounded-full bg-zinc-800 border-2 border-zinc-950 shadow-inner flex items-center justify-center">
-                          {cookingOrdersCount > 0 && (
-                            <div className="absolute inset-1.5 rounded-full bg-gradient-to-t from-orange-600 via-red-600 to-amber-300 animate-flame"></div>
-                          )}
-                          <div className="absolute inset-0.5 rounded-full bg-zinc-900 border border-slate-700 shadow-md flex items-center justify-center">
-                            {cookingOrdersCount > 0 && (
-                              <div className="h-3 w-3 rounded-full bg-[#00FFA3] animate-ping opacity-60"></div>
-                            )}
-                          </div>
-                          {cookingOrdersCount > 0 && (
-                            <>
-                              <div className="absolute -top-6 left-2 text-white/20 select-none pointer-events-none text-xs font-sans filter blur-[1.5px] animate-steam-1">♨</div>
-                              <div className="absolute -top-8 left-4 text-white/10 select-none pointer-events-none text-xs font-sans filter blur-[2px] animate-steam-2">♨</div>
-                            </>
-                          )}
-                        </div>
+                    {/* Corner Bracket Borders to frame the camera feed */}
+                    <div className="absolute top-3 left-3 w-4 h-4 border-t-2 border-l-2 border-emerald-500/40 pointer-events-none" />
+                    <div className="absolute top-3 right-3 w-4 h-4 border-t-2 border-r-2 border-emerald-500/40 pointer-events-none" />
+                    <div className="absolute bottom-3 left-3 w-4 h-4 border-b-2 border-l-2 border-emerald-500/40 pointer-events-none" />
+                    <div className="absolute bottom-3 right-3 w-4 h-4 border-b-2 border-r-2 border-emerald-500/40 pointer-events-none" />
 
-                        {/* Burner 2 */}
-                        <div className="relative h-12 w-12 rounded-full bg-zinc-800 border-2 border-zinc-950 shadow-inner flex items-center justify-center">
-                          {cookingOrdersCount > 1 && (
-                            <div className="absolute inset-1.5 rounded-full bg-gradient-to-t from-orange-600 via-red-600 to-amber-300 animate-flame"></div>
-                          )}
-                          <div className="absolute inset-0.5 rounded-full bg-zinc-900 border border-slate-700 shadow-md flex items-center justify-center">
-                            {cookingOrdersCount > 1 && (
-                              <div className="h-2 w-2 rounded-full bg-red-500 animate-pulse"></div>
-                            )}
-                          </div>
-                          {cookingOrdersCount > 1 && (
-                            <div className="absolute -top-7 right-2 text-white/25 select-none pointer-events-none text-xs font-sans filter blur-[1px] animate-steam-3">♨</div>
-                          )}
-                        </div>
+                    {/* CCTV Text Overlay: Top Left */}
+                    <div className="absolute left-4 top-4 z-20 flex flex-col text-[8.5px] tracking-widest text-[#00FFA3] leading-3 bg-black/60 backdrop-blur-sm border border-emerald-500/20 px-2.5 py-2 rounded shadow-md">
+                      <div className="flex items-center gap-1.5 font-black">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+                        <span>CV_FEED: ACTIVE</span>
                       </div>
-
-                      {/* Station Countertop */}
-                      <div className="w-full flex justify-between px-1">
-                        <div className="h-4 w-7 rounded bg-amber-900/40 border border-amber-800 flex items-center justify-center text-[5px] text-amber-200 font-bold">BOARD</div>
-                        <div className="h-4 w-4 rounded-full bg-emerald-950/60 border border-teal-500/40 flex items-center justify-center text-[5px] text-teal-300">HERB</div>
-                      </div>
-
-                      {/* Overhead Chef Hat */}
-                      <div className="absolute -bottom-6 left-[40%] flex flex-col items-center z-10">
-                        <div className="h-8 w-8 rounded-full bg-white shadow-lg border border-slate-300 flex items-center justify-center animate-chef-head">
-                          <span className="text-[6px] font-black text-slate-800">CHEF_1</span>
-                        </div>
-                        <div className="h-4 w-12 rounded-t-full bg-slate-900 border border-slate-950 -mt-1 shadow animate-chef-work"></div>
-                      </div>
+                      <span className="text-[7.5px] mt-1 text-slate-400 font-mono">CAM-01_PRIMARY_PREP</span>
+                      <span className="text-[7.5px] text-slate-400 font-mono">TS: 2026-07-16 {cctvTimeStr}</span>
+                      <span className="text-[7.5px] text-slate-400 font-mono font-bold text-[#00FFA3]">LATENCY: {cctvLatency}s</span>
                     </div>
 
-                    {/* 2. GRILL STATION */}
-                    <div className="absolute left-[44%] top-[18%] w-[130px] h-[125px] rounded-lg bg-gradient-to-b from-slate-700 to-slate-800 border border-slate-600 shadow-[0_12px_24px_rgba(0,0,0,0.5)] p-1.5 flex flex-col justify-between">
-                      <div className="h-[65px] w-full rounded bg-zinc-900 border border-zinc-950 p-1 relative overflow-hidden flex flex-col justify-around animate-grill-heat">
-                        
-                        {/* Red Heating rods */}
-                        <div className="absolute inset-0 opacity-25" style={{
-                          backgroundImage: 'repeating-linear-gradient(90deg, #ea580c, #ea580c 3px, transparent 3px, transparent 12px)'
-                        }} />
-                        
-                        {/* Grill patties */}
-                        <div className="flex justify-around relative z-10">
-                          <div className="h-4 w-4 rounded-full bg-amber-950 border border-amber-900 shadow flex items-center justify-center">
-                            <div className="h-1.5 w-1.5 rounded-full bg-orange-500 animate-pulse"></div>
-                          </div>
-                          <div className="h-4 w-4 rounded-full bg-amber-950 border border-amber-900 shadow"></div>
-                        </div>
-                        <div className="flex justify-around relative z-10">
-                          <div className="h-4 w-4 rounded-full bg-amber-950 border border-amber-900 shadow"></div>
-                          <div className="h-4 w-4 rounded-full bg-amber-950 border border-amber-900 shadow flex items-center justify-center">
-                            <div className="h-1 w-1 rounded-full bg-orange-500 animate-pulse"></div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Controls */}
-                      <div className="w-full h-3 bg-zinc-800 rounded border border-zinc-900 flex items-center justify-around px-1">
-                        <span className="h-1 w-1 rounded-full bg-red-500"></span>
-                        <span className="h-1 w-1 rounded-full bg-teal-500"></span>
-                      </div>
-
-                      {/* Overhead Chef 2 */}
-                      <div className="absolute -bottom-6 left-[30%] flex flex-col items-center z-10">
-                        <div className="h-8 w-8 rounded-full bg-white shadow-lg border border-slate-300 flex items-center justify-center animate-chef-head">
-                          <span className="text-[6px] font-black text-slate-800">CHEF_2</span>
-                        </div>
-                        <div className="h-4 w-12 rounded-t-full bg-slate-900 border border-slate-950 -mt-1 shadow animate-chef-work"></div>
-                      </div>
+                    {/* Flickering LIVE Indicator: Top Right */}
+                    <div className="absolute right-4 top-4 z-20 flex items-center gap-1.5 bg-black/60 backdrop-blur-sm border border-red-500/20 px-2.5 py-1.5 rounded shadow-md">
+                      <span className="h-2 w-2 rounded-full bg-red-500 animate-[pulse_0.6s_infinite] shadow-[0_0_8px_#ef4444]"></span>
+                      <span className="text-[9px] font-black tracking-widest text-red-500 font-sans uppercase animate-flicker">● LIVE</span>
                     </div>
 
-                    {/* 3. PLATING STATION (Labels update dynamically based on ready orders) */}
-                    <div className="absolute right-[5%] top-[12%] w-[125px] h-[140px] rounded-lg bg-gradient-to-bl from-slate-600 via-slate-500 to-slate-700 border border-slate-500 shadow-[0_12px_24px_rgba(0,0,0,0.5)] p-2 flex flex-col justify-between">
-                      <div className="w-full h-[45px] rounded bg-amber-800/20 border border-amber-700/40 p-1 flex items-center justify-around shadow-inner">
-                        <div className="h-3 w-3 rounded bg-teal-500/80 shadow-sm"></div>
-                        <div className="h-3 w-3 rounded-full bg-red-500/80 shadow-sm animate-pulse"></div>
-                        <div className="h-1.5 w-6 rounded-sm bg-neutral-200/20 border border-neutral-200/30 rotate-12 text-[4px] flex items-center justify-center">KNIFE</div>
-                      </div>
-
-                      <div className="flex items-center justify-between w-full mt-1.5">
-                        <div className="h-8 w-8 rounded-full bg-zinc-700/60 border border-slate-600 shadow-md flex items-center justify-center">
-                          <div className="h-4 w-4 rounded-full bg-gradient-to-tr from-emerald-500 to-amber-400"></div>
-                        </div>
-                        <div className="h-6 w-6 rounded-full bg-zinc-700/60 border border-slate-600 shadow-md flex items-center justify-center">
-                          <div className="h-3 w-3 rounded-full bg-red-400/80"></div>
-                        </div>
-                      </div>
-
-                      {/* takeaway box */}
-                      <div className="w-full flex justify-end">
-                        <div className={`h-5 w-8 rounded flex items-center justify-center text-[5px] text-zinc-950 font-black shadow border border-[#00FFA3]/40 ${
-                          readyOrdersCount > 0 ? 'bg-[#00FFA3] animate-pulse shadow-[0_0_10px_#00FFA3]' : 'bg-[#00FFA3]/20 text-[#00FFA3]'
-                        }`}>
-                          {readyOrdersCount > 0 ? "FOOD_RDY" : "BOX_T"}
-                        </div>
-                      </div>
-
-                      {/* Overhead Chef 3 */}
-                      <div className="absolute -bottom-6 left-[25%] flex flex-col items-center z-10">
-                        <div className="h-8 w-8 rounded-full bg-white shadow-lg border border-slate-300 flex items-center justify-center animate-chef-head">
-                          <span className="text-[6px] font-black text-slate-800">CHEF_3</span>
-                        </div>
-                        <div className="h-4 w-12 rounded-t-full bg-slate-900 border border-slate-950 -mt-1 shadow animate-chef-work"></div>
-                      </div>
-                    </div>
-
-                    {/* AI COMPUTER VISION BOUNDING BOX BRACKETS OVERLAYS */}
-                    {/* Wok Bounding Box (Green) */}
-                    <div className="absolute left-[3%] top-[10%] w-[155px] h-[145px] border border-teal-500/40 bg-teal-500/[0.02] rounded-lg pointer-events-none">
-                      <span className="absolute top-1 left-2 bg-[#00E5FF] text-white text-[7px] font-black px-1.5 py-0.5 rounded shadow uppercase tracking-wider flex items-center gap-0.5">
-                        <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse inline-block" />
-                        WOK_STATION_01 (TEMP: {wokTemp}°C)
+                    {/* DYNAMIC SEMI-TRANSPARENT BOUNDING BOXES */}
+                    
+                    {/* Bounding Box 1: Chef 1 (Preparing) */}
+                    <div className="absolute left-[12%] top-[20%] w-[115px] h-[135px] border-2 border-dashed border-[#00FFA3]/60 bg-[#00FFA3]/[0.03] rounded pointer-events-none transition-all duration-700">
+                      {/* Bounding Box Brackets */}
+                      <div className="absolute -top-1 -left-1 w-2.5 h-2.5 border-t-2 border-l-2 border-[#00FFA3]" />
+                      <div className="absolute -top-1 -right-1 w-2.5 h-2.5 border-t-2 border-r-2 border-[#00FFA3]" />
+                      <div className="absolute -bottom-1 -left-1 w-2.5 h-2.5 border-b-2 border-l-2 border-[#00FFA3]" />
+                      <div className="absolute -bottom-1 -right-1 w-2.5 h-2.5 border-b-2 border-r-2 border-[#00FFA3]" />
+                      
+                      {/* Label Badge */}
+                      <span className="absolute -top-5 left-0 bg-[#00FFA3] text-[#08333C] text-[7px] font-black px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap tracking-wide uppercase">
+                        Chef 1 (Preparing)
                       </span>
-                      <span className="absolute bottom-1 right-2 font-mono text-[7px] text-teal-400 font-semibold">MATCH: {matchScores.wok}%</span>
+                      <span className="absolute bottom-1 left-2 font-mono text-[7px] text-[#00FFA3]/80 font-bold bg-black/50 px-1 rounded">MATCH: 94.2%</span>
                     </div>
 
-                    {/* Grill Bounding Box (Cyan) */}
-                    <div className="absolute left-[42%] top-[12%] w-[135px] h-[135px] border border-cyan-500/30 bg-cyan-500/[0.02] rounded-lg pointer-events-none">
-                      <span className="absolute top-1 left-2 bg-cyan-600 text-white text-[7px] font-black px-1.5 py-0.5 rounded shadow uppercase tracking-wider">
-                        GRILL_01 (TEMP: {grillTemp}°C)
+                    {/* Bounding Box 2: Stove A (Active) */}
+                    <div className="absolute left-[44%] top-[35%] w-[120px] h-[100px] border-2 border-dashed border-emerald-400/60 bg-emerald-500/[0.03] rounded pointer-events-none transition-all duration-700">
+                      {/* Bounding Box Brackets */}
+                      <div className="absolute -top-1 -left-1 w-2.5 h-2.5 border-t-2 border-l-2 border-emerald-400" />
+                      <div className="absolute -top-1 -right-1 w-2.5 h-2.5 border-t-2 border-r-2 border-emerald-400" />
+                      <div className="absolute -bottom-1 -left-1 w-2.5 h-2.5 border-b-2 border-l-2 border-emerald-400" />
+                      <div className="absolute -bottom-1 -right-1 w-2.5 h-2.5 border-b-2 border-r-2 border-emerald-400" />
+                      
+                      {/* Label Badge */}
+                      <span className="absolute -top-5 left-0 bg-emerald-500 text-white text-[7px] font-black px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap tracking-wide uppercase">
+                        Stove A (Active)
                       </span>
-                      <span className="absolute bottom-1 right-2 font-mono text-[7px] text-cyan-300 font-semibold">MATCH: {matchScores.grill}%</span>
+                      <span className="absolute bottom-1 left-2 font-mono text-[7px] text-emerald-400 font-bold bg-black/50 px-1 rounded">TEMP: {grillTemp}°C</span>
                     </div>
 
-                    {/* Plating Bounding Box (Neon Yellow-Lime) */}
-                    <div className="absolute right-[3%] top-[6%] w-[130px] h-[150px] border border-[#00FFA3]/40 bg-[#00FFA3]/[0.02] rounded-lg pointer-events-none">
-                      <span className="absolute top-1 left-2 bg-[#00FFA3] text-[#08333C] text-[7px] font-black px-1.5 py-0.5 rounded shadow uppercase tracking-wider">
-                        PLATING_STATION_01
+                    {/* Bounding Box 3: Order #61435 (Packaging) */}
+                    <div className="absolute right-[10%] top-[15%] w-[110px] h-[115px] border-2 border-dashed border-[#00E5FF]/60 bg-[#00E5FF]/[0.03] rounded pointer-events-none transition-all duration-700">
+                      {/* Bounding Box Brackets */}
+                      <div className="absolute -top-1 -left-1 w-2.5 h-2.5 border-t-2 border-l-2 border-[#00E5FF]" />
+                      <div className="absolute -top-1 -right-1 w-2.5 h-2.5 border-t-2 border-r-2 border-[#00E5FF]" />
+                      <div className="absolute -bottom-1 -left-1 w-2.5 h-2.5 border-b-2 border-l-2 border-[#00E5FF]" />
+                      <div className="absolute -bottom-1 -right-1 w-2.5 h-2.5 border-b-2 border-r-2 border-[#00E5FF]" />
+                      
+                      {/* Label Badge */}
+                      <span className="absolute -top-5 left-0 bg-[#00E5FF] text-white text-[7px] font-black px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap tracking-wide uppercase">
+                        Order #61435 (Packaging)
                       </span>
-                      <span className="absolute bottom-1 right-2 font-mono text-[7px] text-[#00FFA3] font-bold">MATCH: {matchScores.plating}%</span>
+                      <span className="absolute bottom-1 left-2 font-mono text-[7px] text-[#00E5FF] font-bold bg-black/50 px-1 rounded">CONF: 99.1%</span>
                     </div>
 
-                    {/* CCTV Sweeping Scan line */}
-                    <div className="absolute left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-[#00E5FF] to-transparent shadow-[0_0_12px_#00E5FF] opacity-60 pointer-events-none animate-scan-sweep" />
+                    {/* Sweeping scan line */}
+                    <div className="absolute left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-[#00FFA3] to-transparent shadow-[0_0_12px_#00FFA3] opacity-50 pointer-events-none animate-scan-sweep" />
 
-                    {/* CRT Scanline pattern */}
-                    <div className="absolute inset-0 pointer-events-none opacity-[0.07] mix-blend-overlay" style={{
-                      backgroundImage: 'repeating-linear-gradient(0deg, #000, #000 2px, transparent 2px, transparent 4px)'
-                    }} />
                     {/* Vignette Shadow overlay */}
-                    <div className="absolute inset-0 pointer-events-none shadow-[inset_0_0_80px_rgba(0,0,0,0.9)]" />
+                    <div className="absolute inset-0 pointer-events-none shadow-[inset_0_0_70px_rgba(0,0,0,0.8)]" />
 
-                    {/* Overlay Metadata */}
-                    <div className="absolute right-4 bottom-4 rounded border border-white/10 bg-black/85 backdrop-blur-sm p-2.5 font-mono text-[8px] leading-3 text-slate-300 shadow-xl z-20">
-                      <strong className="text-[#00FFA3] tracking-wider font-extrabold block mb-0.5 uppercase">CV Edge telemetry</strong>
-                      <div>Inference: <span className="text-white">{inferenceTime}ms</span></div>
-                      <div>Saved: <span className="text-[#00E5FF] font-bold">+{riderSavedMinutes}m</span></div>
-                      <div>Edge Node: <span className="text-[#00FFA3]">{selectedLocation.includes("Orchard") ? "MS_ORC" : selectedLocation.includes("Bandung") ? "KFC_BDG" : "GK_CTR"}</span></div>
+                    {/* Bottom Metadata Panel: Model & Diagnostics */}
+                    <div className="absolute left-4 bottom-4 right-4 z-20 flex justify-between items-center bg-black/75 backdrop-blur-sm border border-emerald-500/20 px-3 py-2 rounded shadow-md text-[8px] font-mono text-slate-300">
+                      <div className="flex items-center gap-2">
+                        <Cpu className="h-3 w-3 text-[#00FFA3]" />
+                        <span>CORE MODEL: <span className="text-[#00FFA3] font-bold">YOLOv8-SenseCook</span></span>
+                      </div>
+                      <div className="flex gap-4">
+                        <div>LATENCY: <span className="text-[#00E5FF]">{cctvLatency}s</span></div>
+                        <div>FPS: <span className="text-[#00FFA3]">{cctvFps}</span></div>
+                        <div>INFERENCE: <span className="text-white font-bold">{inferenceTime}ms</span></div>
+                      </div>
                     </div>
 
                   </div>
@@ -1736,8 +1783,8 @@ function App() {
                     <span className="font-mono text-3.5xl font-black tracking-tighter text-white glow-text-aqua">
                       {displayMin}:{displaySec}
                     </span>
-                    <span className="text-[8px] font-black uppercase tracking-wider text-[#8DA99C] mt-0.5">
-                      Next Auto-Dispatch
+                    <span className="text-[8px] font-black uppercase tracking-wider text-[#8DA99C] mt-0.5 text-center px-2">
+                      {manualOverride ? "Manual Mode Active" : "Next Auto-Dispatch"}
                     </span>
                   </div>
                 </div>
@@ -1810,12 +1857,16 @@ function App() {
                     <button
                       onClick={handleScheduleDispatch}
                       disabled={orders.length === 0}
-                      className={`flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold text-white shadow-md transition ${
-                        orders.length === 0 ? 'bg-white/[0.04] text-slate-500 cursor-not-allowed border border-white/5' : 'btn-premium'
+                      className={`flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold text-white shadow-md transition cursor-pointer ${
+                        orders.length === 0 
+                          ? 'bg-white/[0.04] text-slate-500 cursor-not-allowed border border-white/5' 
+                          : manualOverride 
+                            ? 'bg-amber-600 hover:bg-amber-500 text-black border border-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.3)] font-black' 
+                            : 'btn-premium'
                       }`}
                     >
                       <Send className="h-4 w-4" />
-                      <span>Force Rider Dispatch</span>
+                      <span>{manualOverride ? "Execute Manual Dispatch" : "Force Rider Dispatch"}</span>
                     </button>
                   )}
                 </div>
@@ -1846,35 +1897,84 @@ function App() {
                 </div>
 
                 <h3 className="mt-1 text-base font-bold text-white">Dynamic Simulator Parameters</h3>
-                <p className="mt-1 text-xs text-slate-300 leading-normal">
-                  Adjust simulated kitchen operational speed or enqueue fresh tickets to see AI models recalibrate logistics parameters.
+                <p className="mt-1 text-xs text-slate-300 leading-normal mb-4">
+                  Adjust simulated kitchen conditions, rider proximity, or manual overrides to see AI models dynamically calibrate.
                 </p>
 
-                {/* Speed Simulator Range Slider */}
-                <div className="mt-4 rounded-xl bg-black/20 p-4 border border-white/5">
-                  <div className="mb-2 flex justify-between text-xs font-semibold">
-                    <span>Kitchen Speed Factor:</span>
-                    <span className="text-[#00FFA3] font-bold">
-                      {speed === 1 ? 'Slow (1.25x prep)' : speed === 3 ? 'Fast (0.75x prep)' : 'Normal (1.0x)'}
-                    </span>
+                {/* 1. KITCHEN LOAD SEVERITY DROPDOWN */}
+                <div className="rounded-xl bg-black/20 p-3.5 border border-white/5 mb-3.5">
+                  <label htmlFor="load-severity" className="block text-[9px] font-bold text-slate-400 uppercase mb-2">Kitchen Load Severity</label>
+                  <select
+                    id="load-severity"
+                    value={kitchenLoadSeverity}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setKitchenLoadSeverity(val);
+                      addLog(`USER SIMULATION: Kitchen Load Severity set to ${val.toUpperCase()}.`);
+                    }}
+                    className="w-full rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-xs font-bold text-white focus:outline-none focus:border-[#00FFA3] cursor-pointer"
+                  >
+                    <option value="Normal" className="bg-[#08333C] text-white font-semibold">Normal Load</option>
+                    <option value="Rush Hour" className="bg-[#08333C] text-white font-semibold">Rush Hour (+20% load)</option>
+                    <option value="Kitchen Backlog" className="bg-[#08333C] text-white font-semibold">Kitchen Backlog (+40% load / delay)</option>
+                  </select>
+                </div>
+
+                {/* 2. RIDER PROXIMITY SLIDER */}
+                <div className="rounded-xl bg-black/20 p-3.5 border border-white/5 mb-3.5">
+                  <div className="mb-2 flex justify-between text-[9px] font-bold text-slate-400 uppercase">
+                    <label htmlFor="rider-proximity-slider">Rider Proximity</label>
+                    <span className="text-[#00E5FF] font-bold font-mono">{riderProximity} km</span>
                   </div>
                   <input
+                    id="rider-proximity-slider"
                     type="range"
                     min="1"
-                    max="3"
-                    step="1"
-                    value={speed}
-                    onChange={handleSpeedSliderChange}
-                    className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-white/10 outline-none accent-[#00FFA3]"
+                    max="5"
+                    step="0.5"
+                    value={riderProximity}
+                    onChange={(e) => {
+                      const val = Number(e.target.value);
+                      setRiderProximity(val);
+                    }}
+                    className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-white/10 outline-none accent-[#00E5FF]"
                     style={{
-                      background: `linear-gradient(to right, #00E5FF 0%, #00E5FF ${(speed - 1) * 50}%, rgba(255, 255, 255, 0.1) ${(speed - 1) * 50}%, rgba(255, 255, 255, 0.1) 100%)`
+                      background: `linear-gradient(to right, #00E5FF 0%, #00E5FF ${(riderProximity - 1) * 25}%, rgba(255, 255, 255, 0.1) ${(riderProximity - 1) * 25}%, rgba(255, 255, 255, 0.1) 100%)`
                     }}
                   />
-                  <div className="mt-2 flex justify-between text-[9px] text-slate-400 font-mono">
-                    <span>SLOW (DELAYED)</span>
-                    <span>STANDARD</span>
-                    <span>FAST (ACCELERATED)</span>
+                  <div className="mt-2 flex justify-between text-[8px] text-slate-500 font-mono">
+                    <span>1.0 km (CRITICAL NEAR)</span>
+                    <span>5.0 km (FAR DISTANCE)</span>
                   </div>
+                </div>
+
+                {/* 3. MANUAL DISPATCH OVERRIDE TOGGLE */}
+                <div className="rounded-xl bg-black/20 p-3.5 border border-white/5 flex items-center justify-between">
+                  <div>
+                    <label htmlFor="manual-dispatch-override-toggle" className="block text-[9px] font-bold text-slate-400 uppercase">Manual Dispatch Override</label>
+                    <p className="text-[8px] text-slate-500 font-mono mt-0.5">
+                      {manualOverride ? "AUTO DISPATCH SUSPENDED" : "AI AUTOPILOT ACTIVE"}
+                    </p>
+                  </div>
+                  <button
+                    id="manual-dispatch-override-toggle"
+                    role="switch"
+                    aria-checked={manualOverride}
+                    onClick={() => {
+                      const next = !manualOverride;
+                      setManualOverride(next);
+                      addLog(`USER SIMULATION: Manual dispatch override toggled to [${next ? "ON" : "OFF"}].`);
+                    }}
+                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                      manualOverride ? 'bg-amber-500 animate-pulse' : 'bg-slate-800'
+                    }`}
+                  >
+                    <span
+                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                        manualOverride ? 'translate-x-5' : 'translate-x-0'
+                      }`}
+                    />
+                  </button>
                 </div>
 
                 {/* Add an Order Form */}
@@ -1998,6 +2098,336 @@ function App() {
 
         </main>
       </div>
+
+      {/* Phase Preview Modal */}
+      {activePreviewPhase !== null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md transition-all duration-300">
+          <div className="relative w-full max-w-2xl rounded-2xl border border-[#00E5FF]/30 bg-[#061A20] shadow-[0_0_50px_rgba(0,229,255,0.2)] p-6 md:p-8 text-[#E6F4ED] overflow-y-auto max-h-[90vh]">
+            
+            {/* Close Button */}
+            <button 
+              onClick={() => setActivePreviewPhase(null)}
+              className="absolute top-4 right-4 p-2 rounded-lg border border-white/5 bg-white/[0.02] hover:bg-white/[0.1] text-slate-400 hover:text-white transition cursor-pointer"
+              aria-label="Close Preview Modal"
+            >
+              <X className="h-4 w-4" />
+            </button>
+
+            {/* Modal Header */}
+            <div className="flex items-center gap-3 border-b border-white/10 pb-4 mb-6">
+              {activePreviewPhase === 2 && <Car className="h-8 w-8 text-[#00E5FF] glow-aqua" />}
+              {activePreviewPhase === 3 && <ShieldCheck className="h-8 w-8 text-[#00FFA3] glow-mint" />}
+              {activePreviewPhase === 4 && <Package className="h-8 w-8 text-amber-400" />}
+              {activePreviewPhase === 5 && <BarChart3 className="h-8 w-8 text-violet-400" />}
+              <div>
+                <span className="text-[10px] font-black uppercase tracking-wider text-[#00FFA3] font-mono block">
+                  Ecosystem Preview // Locked Module 0{activePreviewPhase}
+                </span>
+                <h2 className="text-xl md:text-2xl font-black text-white">
+                  {activePreviewPhase === 2 && "Phase 2: Parking Intelligence"}
+                  {activePreviewPhase === 3 && "Phase 3: Driver Safety AI"}
+                  {activePreviewPhase === 4 && "Phase 4: Smart Pickup Hubs"}
+                  {activePreviewPhase === 5 && "Phase 5: Logistics Analytics"}
+                </h2>
+              </div>
+            </div>
+
+            {/* Modal Content */}
+            <div className="grid gap-6 md:grid-cols-2">
+              
+              {/* Left Column: Information */}
+              <div className="space-y-4">
+                <div>
+                  <h4 className="text-xs font-black uppercase text-[#8DA99C] tracking-wide mb-1">Concept Overview</h4>
+                  <p className="text-xs text-slate-300 leading-relaxed font-medium">
+                    {activePreviewPhase === 2 && "Revolutionizing rider arrival with real-time parking spot telemetry. Our edge cameras identify empty courier lots and guide drivers to optimal spaces within seconds of arrival, minimizing friction and delays."}
+                    {activePreviewPhase === 3 && "Prioritizing driver well-being through advanced computer vision telemetry. Monitors vehicle alignment, rider helmets, and on-road safety metrics to trigger protective dispatch delays or routing adjustments when hazards are detected."}
+                    {activePreviewPhase === 4 && "Transitioning from manual counters to contactless smart lockers. Utilizing ultra-wideband (UWB) and Bluetooth Low Energy (BLE) coordinates to automatically open high-security thermal lockers as soon as the rider steps within 2 meters of the kitchen hub."}
+                    {activePreviewPhase === 5 && "Unifying all local merchant edge nodes into a single global cognitive pipeline. Aggregates restaurant preparation latencies, road bottlenecks, and driver fatigue profiles to dynamically model long-term efficiency gains and business ROI."}
+                  </p>
+                </div>
+
+                <div>
+                  <h4 className="text-xs font-black uppercase text-[#8DA99C] tracking-wide mb-1.5">Key Capabilities</h4>
+                  <ul className="space-y-1.5 text-xs text-slate-300 list-none pl-0">
+                    {activePreviewPhase === 2 && (
+                      <>
+                        <li className="flex items-center gap-2"><span className="h-1 w-1 bg-[#00E5FF] rounded-full" /> Real-time Parking Bay Occupancy Tracking</li>
+                        <li className="flex items-center gap-2"><span className="h-1 w-1 bg-[#00E5FF] rounded-full" /> Smart Allocation & In-App Navigation for Riders</li>
+                        <li className="flex items-center gap-2"><span className="h-1 w-1 bg-[#00E5FF] rounded-full" /> Geofenced Entry/Exit Telemetry</li>
+                        <li className="flex items-center gap-2"><span className="h-1 w-1 bg-[#00E5FF] rounded-full" /> Automated Fine/Violation Detection</li>
+                      </>
+                    )}
+                    {activePreviewPhase === 3 && (
+                      <>
+                        <li className="flex items-center gap-2"><span className="h-1 w-1 bg-[#00FFA3] rounded-full" /> Helmet Verification & Safety Gear Detection</li>
+                        <li className="flex items-center gap-2"><span className="h-1 w-1 bg-[#00FFA3] rounded-full" /> Speed and Acceleration Vector Analysis</li>
+                        <li className="flex items-center gap-2"><span className="h-1 w-1 bg-[#00FFA3] rounded-full" /> Automated Weather & Road Condition Alerts</li>
+                        <li className="flex items-center gap-2"><span className="h-1 w-1 bg-[#00FFA3] rounded-full" /> Fatigue and Break Recommendation Engine</li>
+                      </>
+                    )}
+                    {activePreviewPhase === 4 && (
+                      <>
+                        <li className="flex items-center gap-2"><span className="h-1 w-1 bg-amber-400 rounded-full" /> Contactless RFID/BLE Smart Lockers</li>
+                        <li className="flex items-center gap-2"><span className="h-1 w-1 bg-amber-400 rounded-full" /> Dynamic Locker Temperature Control (Hot/Cold)</li>
+                        <li className="flex items-center gap-2"><span className="h-1 w-1 bg-amber-400 rounded-full" /> Automated Courier Proximity Handshakes</li>
+                        <li className="flex items-center gap-2"><span className="h-1 w-1 bg-amber-400 rounded-full" /> Zero-wait Dual-side Access Portals</li>
+                      </>
+                    )}
+                    {activePreviewPhase === 5 && (
+                      <>
+                        <li className="flex items-center gap-2"><span className="h-1 w-1 bg-violet-400 rounded-full" /> Predictive Grid Congestion Modelling</li>
+                        <li className="flex items-center gap-2"><span className="h-1 w-1 bg-violet-400 rounded-full" /> Merchant Preparation Analytics Dashboard</li>
+                        <li className="flex items-center gap-2"><span className="h-1 w-1 bg-violet-400 rounded-full" /> Dynamic Payout & Delivery Fare Arbitrage</li>
+                        <li className="flex items-center gap-2"><span className="h-1 w-1 bg-violet-400 rounded-full" /> Supply-Demand Imbalance Forecasting</li>
+                      </>
+                    )}
+                  </ul>
+                </div>
+
+                <div className="pt-2 flex flex-wrap gap-4 text-[10px] font-mono border-t border-white/5">
+                  <div>
+                    <span className="text-[#8DA99C] block uppercase font-black">Target Release</span>
+                    <span className="text-white font-bold font-sans">
+                      {activePreviewPhase === 2 && "Q3 2026"}
+                      {activePreviewPhase === 3 && "Q4 2026"}
+                      {activePreviewPhase === 4 && "Q1 2027"}
+                      {activePreviewPhase === 5 && "Q2 2027"}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-[#8DA99C] block uppercase font-black">Security Context</span>
+                    <span className="text-amber-400 font-bold font-mono">ENCRYPTED BETA</span>
+                  </div>
+                  <div>
+                    <span className="text-[#8DA99C] block uppercase font-black">Tech Stack</span>
+                    <span className="text-[#00FFA3] font-bold">
+                      {activePreviewPhase === 2 && "YOLOv8-Nano // MQTT // Geofence"}
+                      {activePreviewPhase === 3 && "OpenCV Edge // IMU // TF-Lite"}
+                      {activePreviewPhase === 4 && "BLE Beacons // Arduino // RPi5"}
+                      {activePreviewPhase === 5 && "PyTorch // ClickHouse // Kafka"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column: Interactive Simulation & Registration */}
+              <div className="flex flex-col justify-between rounded-xl bg-white/[0.02] border border-white/5 p-4.5 space-y-4">
+                
+                {/* Interactive Simulation Dashboard */}
+                <div>
+                  <span className="text-[10px] font-black uppercase tracking-wider text-[#8DA99C] block mb-2 font-mono">
+                    Interactive Telemetry Sandbox
+                  </span>
+                  
+                  {activePreviewPhase === 2 && (
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-3 gap-2">
+                        {parkingBays.map((bay) => (
+                          <button
+                            key={bay.id}
+                            onClick={() => toggleBay(bay.id)}
+                            className={`p-2 rounded-lg border text-center transition cursor-pointer ${
+                              bay.status === "Occupied" 
+                                ? 'bg-red-500/10 border-red-500/30 text-red-400' 
+                                : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                            }`}
+                          >
+                            <span className="text-[10px] block font-mono font-bold">{bay.name}</span>
+                            <span className="text-[8px] uppercase font-black tracking-wider block mt-0.5">{bay.status}</span>
+                          </button>
+                        ))}
+                      </div>
+                      <div className="text-[9px] text-[#8DA99C] leading-normal font-mono bg-black/25 rounded p-2.5 border border-white/[0.03]">
+                        <span className="text-white block font-bold mb-1">🧠 Edge CV Model Analysis:</span>
+                        Occupancy Rate: {Math.round((parkingBays.filter(b => b.status === "Occupied").length / parkingBays.length) * 100)}%<br />
+                        Available Bays: {parkingBays.filter(b => b.status === "Vacant").length} / {parkingBays.length}<br />
+                        <span className="text-[#00FFA3] animate-pulse block mt-1">
+                          {parkingBays.filter(b => b.status === "Vacant").length > 0 
+                            ? `✓ Recommended slot for approaching rider: ${parkingBays.find(b => b.status === "Vacant").name}`
+                            : "⚠ ALL BAYS OCCUPIED - Routing rider to overflow lot B"
+                          }
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {activePreviewPhase === 3 && (
+                    <div className="space-y-3 font-mono text-[10px]">
+                      <div className="rounded-lg bg-black/25 border border-white/[0.03] p-3 space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Overhead Helmet Scan:</span>
+                          <span className={safetyViolationSimulated ? "text-red-400 font-bold animate-pulse" : "text-emerald-400 font-bold"}>
+                            {safetyViolationSimulated ? "⚠ FAIL (No Helmet Detected)" : "✓ PASS (99.8%)"}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Rider Velocity Vector:</span>
+                          <span className={safetyViolationSimulated ? "text-red-400 font-bold" : "text-slate-300"}>
+                            {safetyViolationSimulated ? "54 km/h (Excessive in Bay)" : "22 km/h (Safe)"}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Fatigue Index:</span>
+                          <span>4.2% (Optimal)</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Global Safety Rating:</span>
+                          <span className="text-yellow-400 font-bold">⭐ 4.97</span>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => {
+                          setSafetyViolationSimulated(!safetyViolationSimulated);
+                          addLog(
+                            safetyViolationSimulated 
+                              ? "CV SAFETY: Safety violation cleared. Helmet match rate 99.8%." 
+                              : "CV SAFETY: Triggered high-speed violation for courier Adi Wijaya. Auto-safety hold initiated."
+                          );
+                        }}
+                        className={`w-full py-2 px-3 rounded-lg text-xs font-bold transition cursor-pointer ${
+                          safetyViolationSimulated 
+                            ? 'bg-emerald-500/20 border border-emerald-500 text-emerald-400 hover:bg-emerald-500/35' 
+                            : 'bg-red-500/20 border border-red-500 text-red-400 hover:bg-red-500/35'
+                        }`}
+                      >
+                        {safetyViolationSimulated ? "Resolve Violation Simulation" : "Simulate Safety Violation Event"}
+                      </button>
+                    </div>
+                  )}
+
+                  {activePreviewPhase === 4 && (
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-3 gap-2 font-mono text-[10px]">
+                        {Object.keys(lockerStatus).map((lockerKey) => (
+                          <div key={lockerKey} className="p-2 rounded-lg border border-white/5 bg-black/25 flex flex-col justify-between" style={{ minWidth: 0 }}>
+                            <div className="flex justify-between items-center">
+                              <span className="font-bold text-white">{lockerKey}</span>
+                              <span className={`h-1.5 w-1.5 rounded-full ${
+                                lockerStatus[lockerKey] === "UNLOCKED" 
+                                  ? 'bg-[#00FFA3] animate-ping' 
+                                  : 'bg-red-400'
+                              }`}></span>
+                            </div>
+                            <span className="text-[7.5px] text-[#8DA99C] mt-1 whitespace-nowrap">
+                              {lockerKey === "A01" ? "Hot (65°C)" : lockerKey === "A02" ? "Cold (4°C)" : "Standard"}
+                            </span>
+                            <span className={`text-[8px] font-bold uppercase tracking-wider mt-1 ${
+                              lockerStatus[lockerKey] === "UNLOCKED" ? "text-[#00FFA3]" : "text-slate-400"
+                            }`}>
+                              {lockerStatus[lockerKey]}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                      
+                      <button
+                        onClick={() => {
+                          setLockerStatus({ A01: "UNLOCKED", A02: "Locked", B01: "Locked" });
+                          addLog("IOT TELEMETRY: Bluetooth proximity match confirmed for Rider Sarah Lim. Unlocked locker A01.");
+                        }}
+                        className="w-full btn-premium py-2 px-3 text-xs font-bold text-white rounded-lg cursor-pointer"
+                      >
+                        Simulate Rider BLE Proximity (&lt; 2m)
+                      </button>
+                    </div>
+                  )}
+
+                  {activePreviewPhase === 5 && (
+                    <div className="space-y-3">
+                      <div className="rounded-lg bg-black/25 border border-white/[0.03] p-3 text-[10px] font-mono space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Global Arbitrage Yield:</span>
+                          <span className="text-[#00FFA3] font-bold">+18.42%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Dynamic Courier Fare Delta:</span>
+                          <span className="text-[#00E5FF] font-bold">+$1.48 / order</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Global Node Congestion:</span>
+                          <span className="text-yellow-400 font-bold">Medium</span>
+                        </div>
+                        
+                        {isAnalyticsRunning ? (
+                          <div className="pt-2 border-t border-white/5 space-y-1">
+                            <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                              <div className="h-full bg-gradient-to-r from-[#00E5FF] to-[#00FFA3] animate-[shimmer_1.5s_infinite] w-2/3"></div>
+                            </div>
+                            <span className="text-[8px] text-[#00E5FF] animate-pulse block">Crunching multi-node supply vectors...</span>
+                          </div>
+                        ) : analyticsReport ? (
+                          <div className="pt-2 border-t border-white/5 text-[9px] text-[#00FFA3] leading-normal font-sans font-bold">
+                            {analyticsReport}
+                          </div>
+                        ) : null}
+                      </div>
+
+                      <button
+                        onClick={() => {
+                          setIsAnalyticsRunning(true);
+                          setTimeout(() => {
+                            setIsAnalyticsRunning(false);
+                            setAnalyticsReport("✓ OPTIMIZATION COMPLETE: Reallocated 14 redundant courier corridors. Projected merchant revenue lift: +8.5% over next 12h.");
+                            addLog("ML ENGINE: Completed grid optimization matrix. Output uploaded to central datastore.");
+                          }, 2000);
+                        }}
+                        disabled={isAnalyticsRunning}
+                        className="w-full btn-premium py-2 px-3 text-xs font-bold text-white rounded-lg disabled:opacity-50 cursor-pointer"
+                      >
+                        {isAnalyticsRunning ? "Computing ML Pipeline..." : "Execute 24h Payout Arbitrage"}
+                      </button>
+                    </div>
+                  )}
+
+                </div>
+
+                {/* Registration Form */}
+                <div className="border-t border-white/10 pt-4 space-y-2.5">
+                  <div>
+                    <h5 className="text-[10px] font-black uppercase text-white tracking-wider font-sans">Secure Early Terminal Access</h5>
+                    <p className="text-[9px] text-[#8DA99C] mt-0.5 leading-normal">
+                      Interested in deploying this module to your local outlet? Enter your terminal credentials below to request early beta telemetry access.
+                    </p>
+                  </div>
+
+                  {registeredPhases[activePreviewPhase] ? (
+                    <div className="bg-[#00FFA3]/10 border border-[#00FFA3]/30 text-[#00FFA3] rounded-lg p-2.5 text-center text-[10px] font-black tracking-wider flex items-center justify-center gap-1.5">
+                      <CheckCircle2 className="h-4 w-4" />
+                      <span>✓ TERMINAL ACCREDITED (ID: {registeredPhases[activePreviewPhase]})</span>
+                    </div>
+                  ) : (
+                    <form 
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        const email = e.target.email.value;
+                        if (email) {
+                          setRegisteredPhases(prev => ({ ...prev, [activePreviewPhase]: email }));
+                          addLog(`SYSTEM ACCESS: Provisioned security credentials for Phase ${activePreviewPhase} to key: ${email}.`);
+                        }
+                      }} 
+                      className="flex gap-2"
+                    >
+                      <input 
+                        type="email" 
+                        name="email" 
+                        required 
+                        placeholder="Enter terminal email..." 
+                        className="flex-1 rounded-lg bg-black/40 border border-white/10 px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#00E5FF] min-w-0" 
+                      />
+                      <button type="submit" className="btn-premium text-xs px-4 py-2 font-bold text-white rounded-lg whitespace-nowrap cursor-pointer">
+                        Authorize Terminal
+                      </button>
+                    </form>
+                  )}
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
 
     </div>
   )
