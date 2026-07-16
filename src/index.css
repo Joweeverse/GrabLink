@@ -1,24 +1,24 @@
 @import "tailwindcss";
 
 :root {
-  --grab-green: #00B14F;
-  --grab-dark-green: #004A26;
-  --neon-lime: #CFFF3D;
-  --bg-dark: #050A07;
-  --bg-card: rgba(14, 25, 19, 0.55);
-  --border-glass: rgba(0, 177, 79, 0.15);
-  --border-glass-hover: rgba(207, 255, 61, 0.35);
-  --text-primary: #E6F4ED;
-  --text-secondary: #8DA99C;
+  --sense-aqua: #00E5FF;
+  --sense-dark-teal: #08333C;
+  --neon-aqua: #00FFA3;
+  --bg-dark: #040D12;
+  --bg-card: rgba(6, 26, 32, 0.55);
+  --border-glass: rgba(0, 229, 255, 0.15);
+  --border-glass-hover: rgba(0, 255, 163, 0.35);
+  --text-primary: #EBF7F9;
+  --text-secondary: #8DADB9;
 }
 
 body {
   margin: 0;
   background: var(--bg-dark);
   background-image: 
-    radial-gradient(circle at 10% 20%, rgba(0, 177, 79, 0.1) 0%, transparent 45%),
-    radial-gradient(circle at 90% 80%, rgba(207, 255, 61, 0.05) 0%, transparent 45%),
-    radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.95) 0%, #030604 100%);
+    radial-gradient(circle at 10% 20%, rgba(0, 229, 255, 0.1) 0%, transparent 45%),
+    radial-gradient(circle at 90% 80%, rgba(0, 255, 163, 0.05) 0%, transparent 45%),
+    radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.95) 0%, #02080B 100%);
   color: var(--text-primary);
   font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
   overflow-x: hidden;
@@ -44,21 +44,21 @@ code, pre, .font-mono {
 }
 
 .glass-card:hover {
-  background: rgba(18, 32, 24, 0.7);
+  background: rgba(10, 36, 44, 0.7);
   border-color: var(--border-glass-hover);
-  box-shadow: 0 16px 48px 0 rgba(0, 177, 79, 0.15);
+  box-shadow: 0 16px 48px 0 rgba(0, 229, 255, 0.15);
   transform: translateY(-2px);
 }
 
 .glass-sidebar {
-  background: rgba(5, 10, 7, 0.85);
+  background: rgba(4, 13, 18, 0.85);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-right: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .glass-header {
-  background: rgba(5, 10, 7, 0.7);
+  background: rgba(4, 13, 18, 0.7);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
@@ -75,33 +75,33 @@ code, pre, .font-mono {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(0, 177, 79, 0.25);
+  background: rgba(0, 229, 255, 0.25);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(207, 255, 61, 0.5);
+  background: rgba(0, 255, 163, 0.5);
 }
 
 /* Glow Utilities */
-.glow-green {
-  box-shadow: 0 0 20px rgba(0, 177, 79, 0.35);
+.glow-aqua {
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.35);
 }
 
-.glow-lime {
-  box-shadow: 0 0 20px rgba(207, 255, 61, 0.35);
+.glow-mint {
+  box-shadow: 0 0 20px rgba(0, 255, 163, 0.35);
 }
 
 .glow-red {
   box-shadow: 0 0 20px rgba(239, 68, 68, 0.35);
 }
 
-.glow-text-green {
-  text-shadow: 0 0 8px rgba(0, 177, 79, 0.5);
+.glow-text-aqua {
+  text-shadow: 0 0 8px rgba(0, 229, 255, 0.5);
 }
 
-.glow-text-lime {
-  text-shadow: 0 0 8px rgba(207, 255, 61, 0.5);
+.glow-text-mint {
+  text-shadow: 0 0 8px rgba(0, 255, 163, 0.5);
 }
 
 /* Advanced Kitchen CCTV & Map Animations */
@@ -252,8 +252,8 @@ code, pre, .font-mono {
 
 /* 10. Peak emergency demand pulse background (when Rush Hour active) */
 @keyframes emergency-pulse {
-  0%, 100% { background-color: rgba(5, 10, 7, 0.85); }
-  50% { background-color: rgba(30, 10, 5, 0.9); }
+  0%, 100% { background-color: rgba(4, 13, 18, 0.85); }
+  50% { background-color: rgba(35, 10, 8, 0.9); }
 }
 
 .animate-emergency {
@@ -267,7 +267,7 @@ code, pre, .font-mono {
 }
 
 .btn-premium {
-  background: linear-gradient(90deg, #00B14F 0%, #00d65f 25%, #CFFF3D 50%, #00d65f 75%, #00B14F 100%);
+  background: linear-gradient(90deg, #00E5FF 0%, #00f0ff 25%, #00FFA3 50%, #00f0ff 75%, #00E5FF 100%);
   background-size: 200% auto;
   animation: shimmer 4s linear infinite;
   transition: all 0.3s ease;
@@ -275,5 +275,5 @@ code, pre, .font-mono {
 
 .btn-premium:hover {
   background-position: right center;
-  box-shadow: 0 0 15px rgba(207, 255, 61, 0.4);
+  box-shadow: 0 0 15px rgba(0, 255, 163, 0.4);
 }

@@ -72,7 +72,7 @@ const locationsConfig = {
       { id: 'G1303', dish: 'Whipped Potato Lrg', items: 1, stage: 'Queued', progress: 10, manualEstimate: 10, aiBaseTime: 7 }
     ]
   },
-  "GrabKitchen - Central Hub": {
+  "SenseKitchen - Central Hub": {
     baseLoad: 91,
     baseConfidence: 96,
     baseSavedTime: 21,
@@ -94,31 +94,31 @@ const locationsConfig = {
 
 // Preset riders list
 const ridersList = [
-  { name: "Adi Wijaya", vehicle: "Honda PCX (Green)", plate: "SG 9422 P", rating: "4.96", status: "Active" },
+  { name: "Adi Wijaya", vehicle: "Honda PCX (Aqua)", plate: "SG 9422 P", rating: "4.96", status: "Active" },
   { name: "Sarah Lim", vehicle: "Yamaha NMAX (Black)", plate: "SG 8812 B", rating: "4.98", status: "Active" },
-  { name: "Rian Hidayat", vehicle: "Suzuki Nex II (Green)", plate: "SG 5410 X", rating: "4.92", status: "Active" },
+  { name: "Rian Hidayat", vehicle: "Suzuki Nex II (Teal)", plate: "SG 5410 X", rating: "4.92", status: "Active" },
   { name: "Taufik H.", vehicle: "Vespa LX 125 (Yellow)", plate: "SG 7731 C", rating: "4.95", status: "Active" }
 ]
 
-// Sleek, futuristic tech Logo Component for GrabSense
+// Sleek, futuristic tech Logo Component for Sense
 const LogoIcon = ({ className = "h-11 w-11" }) => (
-  <div className={`relative ${className} flex items-center justify-center rounded-xl bg-gradient-to-br from-[#041A0F] to-[#010C07] border border-[#00B14F]/30 shadow-[0_0_20px_rgba(0,177,79,0.2)] overflow-hidden group select-none`}>
+  <div className={`relative ${className} flex items-center justify-center rounded-xl bg-gradient-to-br from-[#011B22] to-[#010E14] border border-[#00E5FF]/30 shadow-[0_0_20px_rgba(0,177,79,0.2)] overflow-hidden group select-none`}>
     {/* Animated shine line on hover */}
-    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#00B14F]/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] pointer-events-none" />
+    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#00E5FF]/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] pointer-events-none" />
     
     <svg viewBox="0 0 100 100" className="h-4/5 w-4/5 drop-shadow-[0_0_8px_rgba(0,177,79,0.5)]">
       <defs>
         <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#00B14F" />
-          <stop offset="100%" stopColor="#CFFF3D" />
+          <stop offset="0%" stopColor="#00E5FF" />
+          <stop offset="100%" stopColor="#00FFA3" />
         </linearGradient>
       </defs>
       {/* Outer spinning radar array */}
-      <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(0, 177, 79, 0.15)" strokeWidth="4" strokeDasharray="10 15" className="animate-[spin_40s_linear_infinite]" />
-      <circle cx="50" cy="50" r="32" fill="none" stroke="rgba(207, 255, 61, 0.1)" strokeWidth="2" />
+      <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(0, 229, 255, 0.15)" strokeWidth="4" strokeDasharray="10 15" className="animate-[spin_40s_linear_infinite]" />
+      <circle cx="50" cy="50" r="32" fill="none" stroke="rgba(0, 255, 163, 0.1)" strokeWidth="2" />
       {/* Dynamic route/link mapping symbol (Stylized merged G and S path) */}
       <path 
-        d="M 75 35 A 30 30 0 1 0 75 65 L 55 65 A 10 10 0 0 1 55 55 L 75 55" 
+        d="M 65 30 C 48 30, 35 40, 35 50 C 35 62, 65 58, 65 70 C 65 80, 52 90, 35 90" 
         fill="none" 
         stroke="url(#logoGrad)" 
         strokeWidth="9" 
@@ -126,13 +126,13 @@ const LogoIcon = ({ className = "h-11 w-11" }) => (
         strokeLinejoin="round"
       />
       {/* Pulse central AI core node */}
-      <circle cx="50" cy="45" r="5" fill="#CFFF3D" className="animate-pulse" />
-      <circle cx="50" cy="45" r="10" fill="none" stroke="#CFFF3D" strokeWidth="1" opacity="0.5" className="animate-ping" />
+      <circle cx="50" cy="45" r="5" fill="#00FFA3" className="animate-pulse" />
+      <circle cx="50" cy="45" r="10" fill="none" stroke="#00FFA3" strokeWidth="1" opacity="0.5" className="animate-ping" />
     </svg>
     
     {/* Micro status pin on corner */}
-    <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-[#CFFF3D] shadow-[0_0_6px_#CFFF3D]">
-      <span className="absolute inset-0 rounded-full bg-[#CFFF3D] animate-ping" />
+    <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-[#00FFA3] shadow-[0_0_6px_#00FFA3]">
+      <span className="absolute inset-0 rounded-full bg-[#00FFA3] animate-ping" />
     </span>
   </div>
 )
@@ -199,9 +199,9 @@ function App() {
         roi: [14.00, 17.50, 21.00, 24.50, 28.00, 31.50, 31.50, 31.50]
       }
     },
-    "GrabKitchen - Central Hub": {
-      orders: JSON.parse(JSON.stringify(locationsConfig["GrabKitchen - Central Hub"].initialOrders)),
-      riderSavedMinutes: locationsConfig["GrabKitchen - Central Hub"].baseSavedTime,
+    "SenseKitchen - Central Hub": {
+      orders: JSON.parse(JSON.stringify(locationsConfig["SenseKitchen - Central Hub"].initialOrders)),
+      riderSavedMinutes: locationsConfig["SenseKitchen - Central Hub"].baseSavedTime,
       metricsHistory: {
         kitchenLoad: [55, 65, 72, 80, 78, 85, 88, 91],
         activeOrders: [3, 4, 5, 4, 4, 5, 5, 5],
@@ -320,10 +320,10 @@ function App() {
   useEffect(() => {
     const timeStr = getFormattedTime()
     setLogs([
-      `[${timeStr}] SYSTEM: Initialize Grab Sense Operations Command Center v4.12-Prod.`,
+      `[${timeStr}] SYSTEM: Initialize Sense Operations Command Center v4.12-Prod.`,
       `[${timeStr}] CV ANALYTICS: Connected overhead camera feed CAM-01 (1080p, 30fps).`,
       `[${timeStr}] AI MODEL: Active continuous readiness scoring calculation completed.`,
-      `[${timeStr}] API PUSH: Updated dispatch recommendation sent to Grab Engine.`
+      `[${timeStr}] API PUSH: Updated dispatch recommendation sent to Sense Engine.`
     ])
   }, [])
 
@@ -381,7 +381,7 @@ function App() {
     } else {
       addLog(`USER EVENT: Manual override dispatch clicked for Order ${orderId}.`)
     }
-    addLog(`GRAB ENGINE: Match sequence completed. Rider ${rider.name} (${rider.vehicle}) assigned to Order ${orderId}. Approaching outlet...`)
+    addLog(`Sense Engine: Match sequence completed. Rider ${rider.name} (${rider.vehicle}) assigned to Order ${orderId}. Approaching outlet...`)
     addLog(`SYSTEM: DRIVER DISPATCHED for Order ${orderId}. Match sequence confirmed.`)
 
     // Change status of this specific order to 'Dispatched'
@@ -551,7 +551,7 @@ function App() {
       const liveMessages = [
         "CV ANALYTICS: Processing overhead spatial flow. 3 active cooks detected.",
         "AI MODEL: Recalculating dish preparation velocities across stations.",
-        "GRAB ENGINE: Scanning driver density indices in the merchant perimeter.",
+        "Sense Engine: Scanning driver density indices in the merchant perimeter.",
         "TELEMETRY: Synchronized cloud logistics buffer with central registry.",
         "CV ANALYTICS: Woking and grill temperature status within normal range."
       ]
@@ -815,7 +815,7 @@ function App() {
     return logs.filter(log => {
       if (logFilter === "ai" && log.includes("AI MODEL:")) return true
       if (logFilter === "vision" && log.includes("CV ANALYTICS:")) return true
-      if (logFilter === "engine" && log.includes("GRAB ENGINE:")) return true
+      if (logFilter === "engine" && log.includes("Sense Engine:")) return true
       if (logFilter === "system" && log.includes("SYSTEM:")) return true
       if (logFilter === "user" && (log.includes("USER EVENT:") || log.includes("AUTOMATED EVENT:"))) return true
       return false
@@ -935,22 +935,22 @@ function App() {
     }`}>
       
       {/* BACKGROUND GLOW ORBS */}
-      <div className="absolute top-[10%] left-[5%] w-[450px] h-[450px] rounded-full bg-[#00B14F] filter blur-[150px] opacity-[0.08] pointer-events-none animate-orb-1 z-0"></div>
-      <div className="absolute bottom-[10%] right-[5%] w-[500px] h-[500px] rounded-full bg-[#CFFF3D] filter blur-[160px] opacity-[0.05] pointer-events-none animate-orb-2 z-0"></div>
+      <div className="absolute top-[10%] left-[5%] w-[450px] h-[450px] rounded-full bg-[#00E5FF] filter blur-[150px] opacity-[0.08] pointer-events-none animate-orb-1 z-0"></div>
+      <div className="absolute bottom-[10%] right-[5%] w-[500px] h-[500px] rounded-full bg-[#00FFA3] filter blur-[160px] opacity-[0.05] pointer-events-none animate-orb-2 z-0"></div>
 
       {/* 1. LEFT GLOBAL SIDEBAR */}
       <aside className="fixed bottom-0 top-0 left-0 hidden w-64 glass-sidebar p-6 md:block z-40">
         <div className="flex flex-col h-full justify-between">
           <div className="space-y-8">
             
-            {/* Grab Sense Logo Header */}
+            {/* Sense Logo Header */}
             <div className="flex items-center gap-3">
               <LogoIcon className="h-11 w-11" />
               <div>
                 <span className="text-lg font-black tracking-tight text-white block leading-none">
-                  Grab<span className="bg-gradient-to-r from-[#00B14F] to-[#CFFF3D] bg-clip-text text-transparent font-extrabold">Sense</span>
+                  Grab<span className="bg-gradient-to-r from-[#00E5FF] to-[#00FFA3] bg-clip-text text-transparent font-extrabold">Sense</span>
                 </span>
-                <span className="block text-[7.5px] font-black tracking-widest text-[#CFFF3D] uppercase mt-1.5 leading-none font-mono">
+                <span className="block text-[7.5px] font-black tracking-widest text-[#00FFA3] uppercase mt-1.5 leading-none font-mono">
                   Link Smarter, Move Faster
                 </span>
               </div>
@@ -963,12 +963,12 @@ function App() {
                 <div className="space-y-1.5">
                   
                   {/* Phase 1: Active */}
-                  <button className="flex w-full items-center justify-between rounded-xl bg-[#00B14F]/10 border border-[#00B14F]/20 px-3.5 py-2.5 text-xs font-bold text-white transition hover:bg-[#00B14F]/15">
+                  <button className="flex w-full items-center justify-between rounded-xl bg-[#00E5FF]/10 border border-[#00E5FF]/20 px-3.5 py-2.5 text-xs font-bold text-white transition hover:bg-[#00E5FF]/15">
                     <div className="flex items-center gap-2.5">
-                      <ChefHat className="h-4 w-4 text-[#00B14F]" />
+                      <ChefHat className="h-4 w-4 text-[#00E5FF]" />
                       <span>Phase 1: Kitchen Readiness</span>
                     </div>
-                    <ChevronRight className="h-3.5 w-3.5 text-[#00B14F]" />
+                    <ChevronRight className="h-3.5 w-3.5 text-[#00E5FF]" />
                   </button>
 
                   {/* Locked Modules with premium encrypted style */}
@@ -997,15 +997,15 @@ function App() {
               <div className="space-y-2 text-[10px] text-slate-400 font-mono">
                 <div className="flex justify-between border-b border-white/[0.03] pb-1">
                   <span>Temperature:</span>
-                  <span className={`font-bold ${edgeTemperature > 43 ? 'text-amber-400' : 'text-emerald-400'}`}>{edgeTemperature} °C</span>
+                  <span className={`font-bold ${edgeTemperature > 43 ? 'text-amber-400' : 'text-teal-400'}`}>{edgeTemperature} °C</span>
                 </div>
                 <div className="flex justify-between border-b border-white/[0.03] pb-1">
                   <span>Core Model:</span>
-                  <span className="text-white">YOLOv8-GrabCook</span>
+                  <span className="text-white">YOLOv8-SenseCook</span>
                 </div>
                 <div className="flex justify-between border-b border-white/[0.03] pb-1">
                   <span>Inference:</span>
-                  <span className="text-emerald-400 font-bold">{inferenceTime}ms (Active)</span>
+                  <span className="text-teal-400 font-bold">{inferenceTime}ms (Active)</span>
                 </div>
                 <div className="flex justify-between pb-1">
                   <span>Edge Nodes:</span>
@@ -1017,12 +1017,12 @@ function App() {
           </div>
 
           {/* System Telemetry Tag bottom */}
-          <div className="rounded-xl bg-gradient-to-tr from-[#004A26]/50 to-[#00B14F]/10 p-3.5 text-[10px] text-[#8DA99C] border border-[#00B14F]/15">
+          <div className="rounded-xl bg-gradient-to-tr from-[#08333C]/50 to-[#00E5FF]/10 p-3.5 text-[10px] text-[#8DA99C] border border-[#00E5FF]/15">
             <span className="font-bold text-white block mb-1 flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-[#00B14F] inline-block animate-pulse"></span>
+              <span className="h-2 w-2 rounded-full bg-[#00E5FF] inline-block animate-pulse"></span>
               SECURE TLS CONNECTED
             </span>
-            <span>Real-time cryptographic pipeline synchronized to central Grab dispatch hubs.</span>
+            <span>Real-time cryptographic pipeline synchronized to central Sense dispatch hubs.</span>
           </div>
         </div>
       </aside>
@@ -1037,7 +1037,7 @@ function App() {
               <LogoIcon className="h-9 w-9" />
             </div>
             <h1 className="text-sm font-extrabold tracking-tight text-white md:text-base flex items-center gap-2">
-              <span className="md:inline hidden text-[9px] bg-white/[0.04] text-[#CFFF3D] border border-white/5 font-mono px-2 py-0.5 rounded tracking-widest font-black uppercase">PROD-v4.12</span>
+              <span className="md:inline hidden text-[9px] bg-white/[0.04] text-[#00FFA3] border border-white/5 font-mono px-2 py-0.5 rounded tracking-widest font-black uppercase">PROD-v4.12</span>
               <span>Operations Command Center</span>
             </h1>
           </div>
@@ -1045,10 +1045,10 @@ function App() {
           <div className="flex items-center gap-4">
             
             {/* Live Indicator */}
-            <div className="flex items-center gap-2.5 rounded-full border border-[#00B14F]/30 bg-[#00B14F]/10 px-3.5 py-1 text-[11px] font-extrabold tracking-wider text-[#CFFF3D]">
+            <div className="flex items-center gap-2.5 rounded-full border border-[#00E5FF]/30 bg-[#00E5FF]/10 px-3.5 py-1 text-[11px] font-extrabold tracking-wider text-[#00FFA3]">
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00B14F] opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00B14F]"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00E5FF] opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00E5FF]"></span>
               </span>
               LIVE ARBITRAGE
             </div>
@@ -1056,8 +1056,8 @@ function App() {
             {/* Enterprise Multi-Store Switcher Dropdown */}
             <div className="relative">
               <label htmlFor="location-switcher" className="sr-only">Select Location</label>
-              <div className="flex items-center gap-2 rounded-lg border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] px-3.5 py-1.5 text-xs font-bold text-white transition focus-within:ring-1 focus-within:ring-[#00B14F]/50">
-                <MapPin className="h-4 w-4 text-[#00B14F]" />
+              <div className="flex items-center gap-2 rounded-lg border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] px-3.5 py-1.5 text-xs font-bold text-white transition focus-within:ring-1 focus-within:ring-[#00E5FF]/50">
+                <MapPin className="h-4 w-4 text-[#00E5FF]" />
                 <select
                   id="location-switcher"
                   value={selectedLocation}
@@ -1067,7 +1067,7 @@ function App() {
                 >
                   <option value="McDonald's - Orchard Road" className="bg-[#050A07] text-[#E6F4ED]">McDonald's - Orchard Road</option>
                   <option value="KFC - Bandung Junction" className="bg-[#050A07] text-[#E6F4ED]">KFC - Bandung Junction</option>
-                  <option value="GrabKitchen - Central Hub" className="bg-[#050A07] text-[#E6F4ED]">GrabKitchen - Central Hub</option>
+                  <option value="SenseKitchen - Central Hub" className="bg-[#050A07] text-[#E6F4ED]">SenseKitchen - Central Hub</option>
                 </select>
               </div>
             </div>
@@ -1081,7 +1081,7 @@ function App() {
           {isRefreshing && (
             <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[#050A07]/90 backdrop-blur-md transition-all duration-300">
               <div className="flex flex-col items-center gap-4 rounded-2xl border border-white/5 bg-white/[0.02] p-8 shadow-2xl max-w-sm text-center">
-                <RefreshCw className="h-8 w-8 animate-spin text-[#CFFF3D] glow-lime" />
+                <RefreshCw className="h-8 w-8 animate-spin text-[#00FFA3] glow-mint" />
                 <div>
                   <h4 className="font-extrabold text-white text-base">SYNCING GLOBAL TELEMETRY</h4>
                   <p className="text-xs text-[#8DA99C] mt-1.5">Recalculating CV parameters, mapping driver grid vectors, and downloading cache for {selectedLocation}...</p>
@@ -1091,21 +1091,21 @@ function App() {
           )}
 
           {/* Scheduled System Update Banner */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between rounded-xl border border-[#00B14F]/25 bg-gradient-to-r from-[#004A26]/30 via-white/[0.01] to-[#CFFF3D]/5 px-4.5 py-3 text-xs text-slate-300 shadow-md gap-3 relative overflow-hidden group">
-            <div className="absolute top-0 left-0 w-1.5 h-full bg-[#00B14F] shadow-[0_0_15px_#00B14F]"></div>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between rounded-xl border border-[#00E5FF]/25 bg-gradient-to-r from-[#08333C]/30 via-white/[0.01] to-[#00FFA3]/5 px-4.5 py-3 text-xs text-slate-300 shadow-md gap-3 relative overflow-hidden group">
+            <div className="absolute top-0 left-0 w-1.5 h-full bg-[#00E5FF] shadow-[0_0_15px_#00E5FF]"></div>
             <div className="flex items-center gap-3 pl-1.5">
-              <Sparkles className="h-4.5 w-4.5 text-[#CFFF3D] animate-pulse" />
+              <Sparkles className="h-4.5 w-4.5 text-[#00FFA3] animate-pulse" />
               <div>
                 <h4 className="font-extrabold text-white text-[11px] tracking-wide uppercase flex items-center gap-1.5">
-                  SYSTEM UPDATE EN ROUTE: GRAB SENSE ENGINE v5.0-BETA
+                  SYSTEM UPDATE EN ROUTE: Sense ENGINE v5.0-BETA
                 </h4>
                 <p className="text-[10px] text-[#8DA99C] mt-0.5 leading-snug">
-                  Our next major edge platform upgrade is scheduled for deployment on <span className="text-[#CFFF3D] font-mono font-bold">July 30 at 02:00 UTC</span>. Live operations will remain uninterrupted during node calibrations.
+                  Our next major edge platform upgrade is scheduled for deployment on <span className="text-[#00FFA3] font-mono font-bold">July 30 at 02:00 UTC</span>. Live operations will remain uninterrupted during node calibrations.
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2 sm:self-center self-end">
-              <span className="rounded bg-[#CFFF3D]/10 border border-[#CFFF3D]/30 px-2 py-0.5 text-[8px] font-black uppercase text-[#CFFF3D] tracking-widest animate-pulse">
+              <span className="rounded bg-[#00FFA3]/10 border border-[#00FFA3]/30 px-2 py-0.5 text-[8px] font-black uppercase text-[#00FFA3] tracking-widest animate-pulse">
                 v5.0 Upgrade Scheduled
               </span>
             </div>
@@ -1144,20 +1144,20 @@ function App() {
                 status: "Active load prediction",
                 statusColor: "bg-amber-500 animate-pulse",
                 icon: Activity,
-                color: "text-[#00B14F]",
+                color: "text-[#00E5FF]",
                 gradId: "loadGrad",
-                gradColor: "#00B14F"
+                gradColor: "#00E5FF"
               },
               {
                 title: "Active Orders",
                 val: activeOrdersCount,
                 history: metricsHistory.activeOrders,
                 status: "Across prep stations",
-                statusColor: "bg-[#00B14F]",
+                statusColor: "bg-[#00E5FF]",
                 icon: Users,
-                color: "text-[#CFFF3D]",
+                color: "text-[#00FFA3]",
                 gradId: "ordersGrad",
-                gradColor: "#CFFF3D"
+                gradColor: "#00FFA3"
               },
               {
                 title: "Confidence Score",
@@ -1166,7 +1166,7 @@ function App() {
                 status: "Dynamic SLA Certitude",
                 statusColor: "bg-emerald-400",
                 icon: TrendingUp,
-                color: "text-emerald-400",
+                color: "text-teal-400",
                 gradId: "confGrad",
                 gradColor: "#10B981"
               },
@@ -1188,9 +1188,9 @@ function App() {
                 status: "Driver idle costs saved",
                 statusColor: "bg-yellow-400",
                 icon: DollarSign,
-                color: "text-[#CFFF3D]",
+                color: "text-[#00FFA3]",
                 gradId: "roiGrad",
-                gradColor: "#CFFF3D"
+                gradColor: "#00FFA3"
               }
             ].map((metric, idx) => {
               const { strokePath, fillPath } = getSparklinePath(metric.history)
@@ -1239,9 +1239,9 @@ function App() {
                 {/* Mode Selector and Titles */}
                 <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div>
-                    <p className="text-[10px] font-black uppercase tracking-wider text-[#CFFF3D] flex items-center gap-1.5">
+                    <p className="text-[10px] font-black uppercase tracking-wider text-[#00FFA3] flex items-center gap-1.5">
                       <Cpu className="h-3 w-3 animate-pulse" />
-                      <span>{viewMode === "cctv" ? `Vision Model Feed: ${selectedLocation.includes("Orchard") ? "CAM_ORCHARD_01" : selectedLocation.includes("Bandung") ? "CAM_BANDUNG_01" : "CAM_GRABKITCHEN_01"}` : "Dynamic Logistics Routing Matrix"}</span>
+                      <span>{viewMode === "cctv" ? `Vision Model Feed: ${selectedLocation.includes("Orchard") ? "CAM_ORCHARD_01" : selectedLocation.includes("Bandung") ? "CAM_BANDUNG_01" : "CAM_SenseKitchen_01"}` : "Dynamic Logistics Routing Matrix"}</span>
                     </p>
                     <h3 className="text-base font-bold text-white mt-0.5">
                       {viewMode === "cctv" ? "Continuous Spatial Occupancy Tracking" : "Simulated GPS Courier Matching"}
@@ -1253,7 +1253,7 @@ function App() {
                     <button
                       onClick={() => setViewMode("cctv")}
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold transition ${
-                        viewMode === "cctv" ? 'bg-[#00B14F] text-white shadow' : 'text-[#8DA99C] hover:text-white'
+                        viewMode === "cctv" ? 'bg-[#00E5FF] text-white shadow' : 'text-[#8DA99C] hover:text-white'
                       }`}
                     >
                       <Camera className="h-3.5 w-3.5" />
@@ -1262,7 +1262,7 @@ function App() {
                     <button
                       onClick={() => setViewMode("map")}
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold transition ${
-                        viewMode === "map" ? 'bg-[#00B14F] text-white shadow' : 'text-[#8DA99C] hover:text-white'
+                        viewMode === "map" ? 'bg-[#00E5FF] text-white shadow' : 'text-[#8DA99C] hover:text-white'
                       }`}
                     >
                       <Map className="h-3.5 w-3.5" />
@@ -1274,7 +1274,7 @@ function App() {
                 {/* THE VIEW SCREEN */}
                 {viewMode === "cctv" ? (
                   /* CCTV CAMERA STREAM VIEW */
-                  <div className="relative h-[290px] overflow-hidden rounded-xl bg-[#090F0C] text-white shadow-2xl font-mono border border-[#00B14F]/10 animate-cctv-flicker">
+                  <div className="relative h-[290px] overflow-hidden rounded-xl bg-[#090F0C] text-white shadow-2xl font-mono border border-[#00E5FF]/10 animate-cctv-flicker">
                     
                     {/* Kitchen Tiling floor lines (CSS Gradients) */}
                     <div className="absolute inset-0 opacity-[0.03]" style={{
@@ -1294,7 +1294,7 @@ function App() {
                       </div>
                       <span className="text-[7.5px] mt-0.5 text-slate-400">CAM-01 / PREP_FLOOR</span>
                       <span className="text-[7.5px] text-slate-400">2026-07-15 {cctvTimeStr}</span>
-                      <span className="text-[7.5px] text-[#CFFF3D] font-bold">LATENCY: {cctvLatency}s | FPS: {cctvFps}</span>
+                      <span className="text-[7.5px] text-[#00FFA3] font-bold">LATENCY: {cctvLatency}s | FPS: {cctvFps}</span>
                     </div>
 
                     {/* 1. WOK STATION (Dynamic Cook details based on orders) */}
@@ -1308,7 +1308,7 @@ function App() {
                           )}
                           <div className="absolute inset-0.5 rounded-full bg-zinc-900 border border-slate-700 shadow-md flex items-center justify-center">
                             {cookingOrdersCount > 0 && (
-                              <div className="h-3 w-3 rounded-full bg-[#CFFF3D] animate-ping opacity-60"></div>
+                              <div className="h-3 w-3 rounded-full bg-[#00FFA3] animate-ping opacity-60"></div>
                             )}
                           </div>
                           {cookingOrdersCount > 0 && (
@@ -1338,7 +1338,7 @@ function App() {
                       {/* Station Countertop */}
                       <div className="w-full flex justify-between px-1">
                         <div className="h-4 w-7 rounded bg-amber-900/40 border border-amber-800 flex items-center justify-center text-[5px] text-amber-200 font-bold">BOARD</div>
-                        <div className="h-4 w-4 rounded-full bg-emerald-950/60 border border-emerald-500/40 flex items-center justify-center text-[5px] text-emerald-300">HERB</div>
+                        <div className="h-4 w-4 rounded-full bg-emerald-950/60 border border-teal-500/40 flex items-center justify-center text-[5px] text-teal-300">HERB</div>
                       </div>
 
                       {/* Overhead Chef Hat */}
@@ -1377,7 +1377,7 @@ function App() {
                       {/* Controls */}
                       <div className="w-full h-3 bg-zinc-800 rounded border border-zinc-900 flex items-center justify-around px-1">
                         <span className="h-1 w-1 rounded-full bg-red-500"></span>
-                        <span className="h-1 w-1 rounded-full bg-emerald-500"></span>
+                        <span className="h-1 w-1 rounded-full bg-teal-500"></span>
                       </div>
 
                       {/* Overhead Chef 2 */}
@@ -1392,7 +1392,7 @@ function App() {
                     {/* 3. PLATING STATION (Labels update dynamically based on ready orders) */}
                     <div className="absolute right-[5%] top-[12%] w-[125px] h-[140px] rounded-lg bg-gradient-to-bl from-slate-600 via-slate-500 to-slate-700 border border-slate-500 shadow-[0_12px_24px_rgba(0,0,0,0.5)] p-2 flex flex-col justify-between">
                       <div className="w-full h-[45px] rounded bg-amber-800/20 border border-amber-700/40 p-1 flex items-center justify-around shadow-inner">
-                        <div className="h-3 w-3 rounded bg-emerald-500/80 shadow-sm"></div>
+                        <div className="h-3 w-3 rounded bg-teal-500/80 shadow-sm"></div>
                         <div className="h-3 w-3 rounded-full bg-red-500/80 shadow-sm animate-pulse"></div>
                         <div className="h-1.5 w-6 rounded-sm bg-neutral-200/20 border border-neutral-200/30 rotate-12 text-[4px] flex items-center justify-center">KNIFE</div>
                       </div>
@@ -1408,8 +1408,8 @@ function App() {
 
                       {/* takeaway box */}
                       <div className="w-full flex justify-end">
-                        <div className={`h-5 w-8 rounded flex items-center justify-center text-[5px] text-zinc-950 font-black shadow border border-[#CFFF3D]/40 ${
-                          readyOrdersCount > 0 ? 'bg-[#CFFF3D] animate-pulse shadow-[0_0_10px_#CFFF3D]' : 'bg-[#CFFF3D]/20 text-[#CFFF3D]'
+                        <div className={`h-5 w-8 rounded flex items-center justify-center text-[5px] text-zinc-950 font-black shadow border border-[#00FFA3]/40 ${
+                          readyOrdersCount > 0 ? 'bg-[#00FFA3] animate-pulse shadow-[0_0_10px_#00FFA3]' : 'bg-[#00FFA3]/20 text-[#00FFA3]'
                         }`}>
                           {readyOrdersCount > 0 ? "FOOD_RDY" : "BOX_T"}
                         </div>
@@ -1426,12 +1426,12 @@ function App() {
 
                     {/* AI COMPUTER VISION BOUNDING BOX BRACKETS OVERLAYS */}
                     {/* Wok Bounding Box (Green) */}
-                    <div className="absolute left-[3%] top-[10%] w-[155px] h-[145px] border border-emerald-500/40 bg-emerald-500/[0.02] rounded-lg pointer-events-none">
-                      <span className="absolute top-1 left-2 bg-[#00B14F] text-white text-[7px] font-black px-1.5 py-0.5 rounded shadow uppercase tracking-wider flex items-center gap-0.5">
+                    <div className="absolute left-[3%] top-[10%] w-[155px] h-[145px] border border-teal-500/40 bg-teal-500/[0.02] rounded-lg pointer-events-none">
+                      <span className="absolute top-1 left-2 bg-[#00E5FF] text-white text-[7px] font-black px-1.5 py-0.5 rounded shadow uppercase tracking-wider flex items-center gap-0.5">
                         <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse inline-block" />
                         WOK_STATION_01 (TEMP: {wokTemp}°C)
                       </span>
-                      <span className="absolute bottom-1 right-2 font-mono text-[7px] text-emerald-400 font-semibold">MATCH: {matchScores.wok}%</span>
+                      <span className="absolute bottom-1 right-2 font-mono text-[7px] text-teal-400 font-semibold">MATCH: {matchScores.wok}%</span>
                     </div>
 
                     {/* Grill Bounding Box (Cyan) */}
@@ -1443,15 +1443,15 @@ function App() {
                     </div>
 
                     {/* Plating Bounding Box (Neon Yellow-Lime) */}
-                    <div className="absolute right-[3%] top-[6%] w-[130px] h-[150px] border border-[#CFFF3D]/40 bg-[#CFFF3D]/[0.02] rounded-lg pointer-events-none">
-                      <span className="absolute top-1 left-2 bg-[#CFFF3D] text-[#004A26] text-[7px] font-black px-1.5 py-0.5 rounded shadow uppercase tracking-wider">
+                    <div className="absolute right-[3%] top-[6%] w-[130px] h-[150px] border border-[#00FFA3]/40 bg-[#00FFA3]/[0.02] rounded-lg pointer-events-none">
+                      <span className="absolute top-1 left-2 bg-[#00FFA3] text-[#08333C] text-[7px] font-black px-1.5 py-0.5 rounded shadow uppercase tracking-wider">
                         PLATING_STATION_01
                       </span>
-                      <span className="absolute bottom-1 right-2 font-mono text-[7px] text-[#CFFF3D] font-bold">MATCH: {matchScores.plating}%</span>
+                      <span className="absolute bottom-1 right-2 font-mono text-[7px] text-[#00FFA3] font-bold">MATCH: {matchScores.plating}%</span>
                     </div>
 
                     {/* CCTV Sweeping Scan line */}
-                    <div className="absolute left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-[#00B14F] to-transparent shadow-[0_0_12px_#00B14F] opacity-60 pointer-events-none animate-scan-sweep" />
+                    <div className="absolute left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-[#00E5FF] to-transparent shadow-[0_0_12px_#00E5FF] opacity-60 pointer-events-none animate-scan-sweep" />
 
                     {/* CRT Scanline pattern */}
                     <div className="absolute inset-0 pointer-events-none opacity-[0.07] mix-blend-overlay" style={{
@@ -1462,20 +1462,20 @@ function App() {
 
                     {/* Overlay Metadata */}
                     <div className="absolute right-4 bottom-4 rounded border border-white/10 bg-black/85 backdrop-blur-sm p-2.5 font-mono text-[8px] leading-3 text-slate-300 shadow-xl z-20">
-                      <strong className="text-[#CFFF3D] tracking-wider font-extrabold block mb-0.5 uppercase">CV Edge telemetry</strong>
+                      <strong className="text-[#00FFA3] tracking-wider font-extrabold block mb-0.5 uppercase">CV Edge telemetry</strong>
                       <div>Inference: <span className="text-white">{inferenceTime}ms</span></div>
-                      <div>Saved: <span className="text-[#00B14F] font-bold">+{riderSavedMinutes}m</span></div>
-                      <div>Edge Node: <span className="text-[#CFFF3D]">{selectedLocation.includes("Orchard") ? "MS_ORC" : selectedLocation.includes("Bandung") ? "KFC_BDG" : "GK_CTR"}</span></div>
+                      <div>Saved: <span className="text-[#00E5FF] font-bold">+{riderSavedMinutes}m</span></div>
+                      <div>Edge Node: <span className="text-[#00FFA3]">{selectedLocation.includes("Orchard") ? "MS_ORC" : selectedLocation.includes("Bandung") ? "KFC_BDG" : "GK_CTR"}</span></div>
                     </div>
 
                   </div>
                 ) : (
                   /* LIVE COURIER GPS SIMULATED MAP VIEW */
-                  <div className="relative h-[290px] overflow-hidden rounded-xl bg-[#090F0C] border border-[#00B14F]/10 shadow-2xl">
+                  <div className="relative h-[290px] overflow-hidden rounded-xl bg-[#090F0C] border border-[#00E5FF]/10 shadow-2xl">
                     
                     {/* Map Grid Pattern background */}
                     <div className="absolute inset-0 opacity-[0.06]" style={{
-                      backgroundImage: 'radial-gradient(circle, #00B14F 1px, transparent 1px)',
+                      backgroundImage: 'radial-gradient(circle, #00E5FF 1px, transparent 1px)',
                       backgroundSize: '16px 16px'
                     }} />
 
@@ -1494,14 +1494,14 @@ function App() {
                       <path 
                         id="route-approach"
                         d="M 40 190 Q 90 150 180 120" 
-                        stroke="rgba(0, 177, 79, 0.15)" 
+                        stroke="rgba(0, 229, 255, 0.15)" 
                         strokeWidth="5" 
                         fill="none" 
                         strokeLinecap="round" 
                       />
                       <path 
                         d="M 40 190 Q 90 150 180 120" 
-                        stroke="#00B14F" 
+                        stroke="#00E5FF" 
                         strokeWidth="1.5" 
                         strokeDasharray="4, 12" 
                         fill="none" 
@@ -1514,14 +1514,14 @@ function App() {
                       <path 
                         id="route-deliver"
                         d="M 180 120 Q 280 110 380 70" 
-                        stroke="rgba(207, 255, 61, 0.15)" 
+                        stroke="rgba(0, 255, 163, 0.15)" 
                         strokeWidth="5" 
                         fill="none" 
                         strokeLinecap="round" 
                       />
                       <path 
                         d="M 180 120 Q 280 110 380 70" 
-                        stroke="#CFFF3D" 
+                        stroke="#00FFA3" 
                         strokeWidth="1.5" 
                         strokeDasharray="4, 12" 
                         fill="none" 
@@ -1532,16 +1532,16 @@ function App() {
 
                       {/* Customer Location Pin */}
                       <g transform="translate(380, 70)">
-                        <circle r="12" fill="none" stroke="#CFFF3D" strokeWidth="1" className="animate-radar-pulse" />
-                        <circle r="4" fill="#CFFF3D" />
-                        <text y="-10" textAnchor="middle" fill="#CFFF3D" fontSize="8" fontWeight="bold" fontFamily="monospace">CUSTOMER</text>
+                        <circle r="12" fill="none" stroke="#00FFA3" strokeWidth="1" className="animate-radar-pulse" />
+                        <circle r="4" fill="#00FFA3" />
+                        <text y="-10" textAnchor="middle" fill="#00FFA3" fontSize="8" fontWeight="bold" fontFamily="monospace">CUSTOMER</text>
                       </g>
 
-                      {/* Grab Merchant Hub Pin */}
+                      {/* Sense Merchant Hub Pin */}
                       <g transform="translate(180, 120)">
-                        <circle r="16" fill="none" stroke="#00B14F" strokeWidth="1" className="animate-radar-pulse" />
-                        <rect x="-6" y="-6" width="12" height="12" rx="2" fill="#00B14F" />
-                        <text y="-13" textAnchor="middle" fill="#00B14F" fontSize="8" fontWeight="bold" fontFamily="monospace">GRAB_MERCHANT</text>
+                        <circle r="16" fill="none" stroke="#00E5FF" strokeWidth="1" className="animate-radar-pulse" />
+                        <rect x="-6" y="-6" width="12" height="12" rx="2" fill="#00E5FF" />
+                        <text y="-13" textAnchor="middle" fill="#00E5FF" fontSize="8" fontWeight="bold" fontFamily="monospace">SENSE_MERCHANT</text>
                       </g>
 
                       {/* Initial Courier Start Position Indicator */}
@@ -1553,8 +1553,8 @@ function App() {
                       {/* Dispatched Rider Dot */}
                       {isDispatched && (
                         <g transform={`translate(${riderCoords.x}, ${riderCoords.y})`}>
-                          <circle r="8" fill="rgba(0,177,79,0.3)" className="animate-ping" />
-                          <circle r="5" fill="#00B14F" stroke="#white" strokeWidth="1" />
+                          <circle r="8" fill="rgba(0,229,255,0.3)" className="animate-ping" />
+                          <circle r="5" fill="#00E5FF" stroke="#white" strokeWidth="1" />
                           <text y="-8" textAnchor="middle" fill="white" fontSize="7" fontWeight="bold" fontFamily="monospace" className="bg-black/80 px-1 py-0.5 rounded">
                             {currentRider.name.split(" ")[0]}
                           </text>
@@ -1565,22 +1565,22 @@ function App() {
 
                     {/* Floating Map Status Overlay */}
                     <div className="absolute left-4 top-4 bg-black/60 backdrop-blur-md border border-white/5 p-3 rounded-lg max-w-[280px]">
-                      <span className="text-[8px] font-black tracking-wider text-[#CFFF3D] uppercase font-mono block">GPS Dispatch Arbitrage</span>
+                      <span className="text-[8px] font-black tracking-wider text-[#00FFA3] uppercase font-mono block">GPS Dispatch Arbitrage</span>
                       <p className="text-[10px] text-white font-bold font-mono mt-1 leading-snug">{mapStatusText}</p>
                       <div className="flex items-center gap-1.5 text-[8px] text-slate-400 font-mono mt-2 border-t border-white/5 pt-1.5">
-                        <span className={`h-1.5 w-1.5 rounded-full ${isDispatched ? 'bg-[#00B14F] animate-pulse' : 'bg-slate-500'}`}></span>
+                        <span className={`h-1.5 w-1.5 rounded-full ${isDispatched ? 'bg-[#00E5FF] animate-pulse' : 'bg-slate-500'}`}></span>
                         <span>{isDispatched ? `Rider progress: ${riderProgress.toFixed(0)}%` : "Ready for dispatch trigger"}</span>
                       </div>
                     </div>
 
                     {/* Telemetry coordinate box */}
                     <div className="absolute right-4 bottom-4 rounded border border-white/10 bg-black/85 backdrop-blur-sm p-2.5 font-mono text-[8px] leading-3 text-slate-300 shadow-xl">
-                      <strong className="text-[#CFFF3D] tracking-wider font-extrabold block mb-0.5 uppercase">GPS Node Stream</strong>
+                      <strong className="text-[#00FFA3] tracking-wider font-extrabold block mb-0.5 uppercase">GPS Node Stream</strong>
                       {isDispatched ? (
                         <>
                           <div>X-Coord: <span className="text-white">{riderCoords.x.toFixed(1)}</span></div>
                           <div>Y-Coord: <span className="text-white">{riderCoords.y.toFixed(1)}</span></div>
-                          <div>Velocity: <span className="text-emerald-400 font-bold">
+                          <div>Velocity: <span className="text-teal-400 font-bold">
                             {riderProgress < 40 
                               ? `${Math.round(25 + Math.sin(riderProgress * 0.1) * 3 + (Math.random() * 2 - 1))} km/h` 
                               : riderProgress < 60 ? "0 km/h (Arrived)" 
@@ -1604,7 +1604,7 @@ function App() {
               <article className="rounded-2xl glass-card p-5 shadow-sm">
                 <div className="mb-4 flex items-center justify-between">
                   <div>
-                    <p className="text-[10px] font-black uppercase tracking-wider text-[#CFFF3D]">Real-Time Logistics Arbitrage</p>
+                    <p className="text-[10px] font-black uppercase tracking-wider text-[#00FFA3]">Real-Time Logistics Arbitrage</p>
                     <h3 className="text-base font-bold text-white">Readiness Forecast: AI Prediction vs. Manual Delta</h3>
                   </div>
                 </div>
@@ -1618,7 +1618,7 @@ function App() {
                         <th className="py-2.5 pr-3 font-bold text-[10px]">Stage & Progress</th>
                         <th className="py-2.5 pr-3 font-bold text-[10px] text-center">Manual Estimate</th>
                         <th className="py-2.5 pr-3 font-bold text-[10px] text-center">AI Predicted Time</th>
-                        <th className="py-2.5 pr-3 font-bold text-[10px] text-center text-[#CFFF3D]">Efficiency Delta</th>
+                        <th className="py-2.5 pr-3 font-bold text-[10px] text-center text-[#00FFA3]">Efficiency Delta</th>
                         <th className="py-2.5 font-bold text-[10px] text-center">Action</th>
                       </tr>
                     </thead>
@@ -1634,7 +1634,7 @@ function App() {
                           const details = getDishDetails(order.dish)
                           return (
                             <tr key={order.id} className="group hover:bg-white/[0.02] transition">
-                              <td className="py-3.5 font-mono font-bold text-[#CFFF3D]">{order.id}</td>
+                              <td className="py-3.5 font-mono font-bold text-[#00FFA3]">{order.id}</td>
                               <td className="py-3.5 pr-3">
                                 <div className="flex items-center gap-2.5">
                                   <div className={`h-8 w-8 rounded-lg border flex items-center justify-center font-serif text-lg ${details.color}`}>
@@ -1651,8 +1651,8 @@ function App() {
                                   <div className="h-1.5 w-16 overflow-hidden rounded-full bg-white/[0.04]">
                                     <div 
                                       className={`h-full rounded-full transition-all duration-300 ${
-                                        order.stage === 'Ready' ? 'bg-emerald-500' :
-                                        order.stage === 'Cooking' ? 'bg-[#00B14F] animate-conveyor' :
+                                        order.stage === 'Ready' ? 'bg-teal-500' :
+                                        order.stage === 'Cooking' ? 'bg-[#00E5FF] animate-conveyor' :
                                         order.stage === 'Dispatched' ? 'bg-cyan-500' :
                                         'bg-amber-400'
                                       }`} 
@@ -1660,8 +1660,8 @@ function App() {
                                     />
                                   </div>
                                   <span className={`font-bold uppercase text-[9px] tracking-wider ${
-                                    order.stage === 'Ready' ? 'text-emerald-400 animate-pulse font-black' :
-                                    order.stage === 'Cooking' ? 'text-[#00B14F]' :
+                                    order.stage === 'Ready' ? 'text-teal-400 animate-pulse font-black' :
+                                    order.stage === 'Cooking' ? 'text-[#00E5FF]' :
                                     order.stage === 'Dispatched' ? 'text-cyan-400 font-extrabold animate-bounce' :
                                     'text-amber-500'
                                   }`}>{order.stage}</span>
@@ -1670,7 +1670,7 @@ function App() {
                               <td className="py-3.5 text-center font-mono text-[#8DA99C] line-through decoration-red-500/40">{order.manualEstimate} min</td>
                               <td className="py-3.5 text-center font-mono font-bold text-white">{order.scaledAiTime} min</td>
                               <td className="py-3.5 text-center">
-                                <span className="inline-flex items-center rounded-full bg-emerald-950/40 px-2 py-0.5 font-mono text-[10px] font-bold text-[#CFFF3D] border border-[#00B14F]/20">
+                                <span className="inline-flex items-center rounded-full bg-teal-950/40 px-2 py-0.5 font-mono text-[10px] font-bold text-[#00FFA3] border border-[#00E5FF]/20">
                                   {order.delta} min
                                 </span>
                               </td>
@@ -1693,7 +1693,7 @@ function App() {
 
                 <div className="mt-4 border-t border-white/5 pt-3 text-[10px] text-[#8DA99C] flex justify-between">
                   <span>* Manual estimates reflect standard bloated legacy dispatcher timing algorithms.</span>
-                  <span className="font-bold text-[#CFFF3D]">Total Items: {processedOrders.reduce((sum, o) => sum + o.items, 0)}</span>
+                  <span className="font-bold text-[#00FFA3]">Total Items: {processedOrders.reduce((sum, o) => sum + o.items, 0)}</span>
                 </div>
               </article>
 
@@ -1722,7 +1722,7 @@ function App() {
                       cx="88"
                       cy="88"
                       r={strokeRadius}
-                      className="stroke-[#00B14F] transition-all duration-1000"
+                      className="stroke-[#00E5FF] transition-all duration-1000"
                       strokeWidth="8"
                       fill="transparent"
                       strokeDasharray={strokeCircumference}
@@ -1733,7 +1733,7 @@ function App() {
                   
                   {/* Absolute Centered Timer */}
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="font-mono text-3.5xl font-black tracking-tighter text-white glow-text-green">
+                    <span className="font-mono text-3.5xl font-black tracking-tighter text-white glow-text-aqua">
                       {displayMin}:{displaySec}
                     </span>
                     <span className="text-[8px] font-black uppercase tracking-wider text-[#8DA99C] mt-0.5">
@@ -1749,7 +1749,7 @@ function App() {
                   <div className="rounded-xl bg-white/[0.02] border border-white/5 p-3.5 text-left text-xs leading-relaxed text-[#8DA99C]">
                     <strong className="text-white block mb-1">Recommended Dispatch Action:</strong>
                     {isDispatched ? (
-                      <span className="text-[#CFFF3D] font-bold animate-pulse">Rider assigned and en route. Dispatch sequence locked. Monitoring GPS locations on live map view...</span>
+                      <span className="text-[#00FFA3] font-bold animate-pulse">Rider assigned and en route. Dispatch sequence locked. Monitoring GPS locations on live map view...</span>
                     ) : (
                       <span>Hold rider dispatch for {displayMin}:{displaySec}. Vision analysis reports food cooking progress is active. Syncing arrival to completion.</span>
                     )}
@@ -1757,22 +1757,22 @@ function App() {
 
                   {/* Dynamic Dispatched Rider Info Card overlay */}
                   {isDispatched ? (
-                    <div className="rounded-xl border border-[#00B14F]/20 bg-gradient-to-tr from-[#004A26]/40 to-[#00B14F]/5 p-3.5 text-left text-xs relative overflow-hidden">
-                      <div className="absolute top-2 right-2 flex items-center gap-1 text-[#CFFF3D] text-[8px] font-mono">
-                        <span className="h-1.5 w-1.5 rounded-full bg-[#CFFF3D] animate-ping"></span>
+                    <div className="rounded-xl border border-[#00E5FF]/20 bg-gradient-to-tr from-[#08333C]/40 to-[#00E5FF]/5 p-3.5 text-left text-xs relative overflow-hidden">
+                      <div className="absolute top-2 right-2 flex items-center gap-1 text-[#00FFA3] text-[8px] font-mono">
+                        <span className="h-1.5 w-1.5 rounded-full bg-[#00FFA3] animate-ping"></span>
                         <span>MATCHED</span>
                       </div>
                       
-                      <span className="text-[8px] font-black tracking-wider text-[#CFFF3D] uppercase font-mono block">Matched Grab Courier</span>
+                      <span className="text-[8px] font-black tracking-wider text-[#00FFA3] uppercase font-mono block">Matched Sense Courier</span>
                       
                       <div className="flex items-center gap-3 mt-2 border-b border-white/[0.04] pb-2.5">
                         {/* Helmet Avatar Icon */}
-                        <div className="h-9 w-9 rounded-full bg-[#00B14F]/20 border border-[#00B14F]/30 flex items-center justify-center text-white">
+                        <div className="h-9 w-9 rounded-full bg-[#00E5FF]/20 border border-[#00E5FF]/30 flex items-center justify-center text-white">
                           🏍️
                         </div>
                         <div>
                           <h4 className="font-bold text-white text-xs">{currentRider.name}</h4>
-                          <p className="text-[10px] text-slate-400 font-medium">Rating: <span className="text-[#CFFF3D]">⭐ {currentRider.rating}</span> | Gold Tier</p>
+                          <p className="text-[10px] text-slate-400 font-medium">Rating: <span className="text-[#00FFA3]">⭐ {currentRider.rating}</span> | Gold Tier</p>
                         </div>
                       </div>
 
@@ -1783,11 +1783,11 @@ function App() {
                         </div>
                         <div className="flex justify-between">
                           <span>Plate Number:</span>
-                          <span className="text-[#CFFF3D] font-bold">{currentRider.plate}</span>
+                          <span className="text-[#00FFA3] font-bold">{currentRider.plate}</span>
                         </div>
                         <div className="flex justify-between">
                           <span>Pickup Status:</span>
-                          <span className="text-[#00B14F] font-bold">
+                          <span className="text-[#00E5FF] font-bold">
                             {riderProgress < 40 ? "En Route (0.2km)" : riderProgress < 60 ? "Arrived - Handing Over" : "Departed to Customer"}
                           </span>
                         </div>
@@ -1802,8 +1802,8 @@ function App() {
 
                   {/* Dispatch Button state switcher */}
                   {isDispatched ? (
-                    <div className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-950/20 border border-[#00B14F]/40 py-3 text-sm font-bold text-[#CFFF3D] shadow-[0_0_15px_rgba(0,177,79,0.15)]">
-                      <CheckCircle2 className="h-5 w-5 text-[#00B14F] animate-bounce" />
+                    <div className="flex w-full items-center justify-center gap-2 rounded-xl bg-teal-950/20 border border-[#00E5FF]/40 py-3 text-sm font-bold text-[#00FFA3] shadow-[0_0_15px_rgba(0,229,255,0.15)]">
+                      <CheckCircle2 className="h-5 w-5 text-[#00E5FF] animate-bounce" />
                       <span>Rider Assigned & Tracking</span>
                     </div>
                   ) : (
@@ -1822,11 +1822,11 @@ function App() {
               </article>
 
               {/* 7. INTERACTIVE QUEUE & SPEED SIMULATOR */}
-              <article className="rounded-2xl bg-gradient-to-tr from-[#021A0F] to-[#004A26] border border-[#00B14F]/25 p-5 text-white shadow-sm">
+              <article className="rounded-2xl bg-gradient-to-tr from-[#011F26] to-[#08333C] border border-[#00E5FF]/25 p-5 text-white shadow-sm">
                 
                 {/* Header */}
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-[#CFFF3D]">
+                  <div className="flex items-center gap-2 text-[#00FFA3]">
                     <Sliders className="h-4 w-4" />
                     <p className="text-[10px] font-black uppercase tracking-wider">Kitchen Control Deck</p>
                   </div>
@@ -1837,7 +1837,7 @@ function App() {
                     className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border transition ${
                       isLunchRush 
                         ? 'bg-red-500/20 border-red-500 text-red-400 hover:bg-red-500/30' 
-                        : 'bg-[#CFFF3D]/10 border-[#CFFF3D]/30 text-[#CFFF3D] hover:bg-[#CFFF3D]/20'
+                        : 'bg-[#00FFA3]/10 border-[#00FFA3]/30 text-[#00FFA3] hover:bg-[#00FFA3]/20'
                     }`}
                   >
                     <Zap className="h-3 w-3 animate-pulse" />
@@ -1854,7 +1854,7 @@ function App() {
                 <div className="mt-4 rounded-xl bg-black/20 p-4 border border-white/5">
                   <div className="mb-2 flex justify-between text-xs font-semibold">
                     <span>Kitchen Speed Factor:</span>
-                    <span className="text-[#CFFF3D] font-bold">
+                    <span className="text-[#00FFA3] font-bold">
                       {speed === 1 ? 'Slow (1.25x prep)' : speed === 3 ? 'Fast (0.75x prep)' : 'Normal (1.0x)'}
                     </span>
                   </div>
@@ -1865,9 +1865,9 @@ function App() {
                     step="1"
                     value={speed}
                     onChange={handleSpeedSliderChange}
-                    className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-white/10 outline-none accent-[#CFFF3D]"
+                    className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-white/10 outline-none accent-[#00FFA3]"
                     style={{
-                      background: `linear-gradient(to right, #00B14F 0%, #00B14F ${(speed - 1) * 50}%, rgba(255, 255, 255, 0.1) ${(speed - 1) * 50}%, rgba(255, 255, 255, 0.1) 100%)`
+                      background: `linear-gradient(to right, #00E5FF 0%, #00E5FF ${(speed - 1) * 50}%, rgba(255, 255, 255, 0.1) ${(speed - 1) * 50}%, rgba(255, 255, 255, 0.1) 100%)`
                     }}
                   />
                   <div className="mt-2 flex justify-between text-[9px] text-slate-400 font-mono">
@@ -1879,7 +1879,7 @@ function App() {
 
                 {/* Add an Order Form */}
                 <form onSubmit={handleAddOrder} className="mt-4.5 space-y-3 border-t border-white/10 pt-4">
-                  <h4 className="text-[10px] font-black tracking-wider text-[#CFFF3D] uppercase">Update the Live Queue</h4>
+                  <h4 className="text-[10px] font-black tracking-wider text-[#00FFA3] uppercase">Update the Live Queue</h4>
                   
                   <div>
                     <label htmlFor="dish-name" className="block text-[9px] font-bold text-slate-300 uppercase mb-1">Dish Title</label>
@@ -1890,7 +1890,7 @@ function App() {
                       placeholder="e.g. Laksa Premium Set"
                       value={newOrderForm.dish}
                       onChange={e => setNewOrderForm({ ...newOrderForm, dish: e.target.value })}
-                      className="w-full rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-xs text-white placeholder:text-slate-600 outline-none transition focus:border-[#CFFF3D] focus:bg-black/30"
+                      className="w-full rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-xs text-white placeholder:text-slate-600 outline-none transition focus:border-[#00FFA3] focus:bg-black/30"
                     />
                   </div>
 
@@ -1905,7 +1905,7 @@ function App() {
                         required
                         value={newOrderForm.prep}
                         onChange={e => setNewOrderForm({ ...newOrderForm, prep: Number(e.target.value) })}
-                        className="w-full rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-xs text-white outline-none transition focus:border-[#CFFF3D] focus:bg-black/30"
+                        className="w-full rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-xs text-white outline-none transition focus:border-[#00FFA3] focus:bg-black/30"
                       />
                     </div>
                     <div>
@@ -1918,14 +1918,14 @@ function App() {
                         required
                         value={newOrderForm.items}
                         onChange={e => setNewOrderForm({ ...newOrderForm, items: Number(e.target.value) })}
-                        className="w-full rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-xs text-white outline-none transition focus:border-[#CFFF3D] focus:bg-black/30"
+                        className="w-full rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-xs text-white outline-none transition focus:border-[#00FFA3] focus:bg-black/30"
                       />
                     </div>
                   </div>
 
                   <button
                     type="submit"
-                    className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#CFFF3D] hover:bg-[#d5ff52] px-4 py-2.5 text-xs font-black text-[#004A26] transition active:scale-[0.99]"
+                    className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#00FFA3] hover:bg-[#d5ff52] px-4 py-2.5 text-xs font-black text-[#08333C] transition active:scale-[0.99]"
                   >
                     <Plus className="h-4 w-4" />
                     <span>Enqueue Ticket</span>
@@ -1941,7 +1941,7 @@ function App() {
           {/* 8. REAL-TIME API LOG TERMINAL */}
           <section className="rounded-2xl border border-white/5 bg-[#070B09] p-5 shadow-lg">
             <div className="mb-3.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-white/[0.04] pb-3">
-              <div className="flex items-center gap-2 text-emerald-400">
+              <div className="flex items-center gap-2 text-teal-400">
                 <Terminal className="h-4 w-4 animate-pulse" />
                 <span className="font-mono text-xs font-bold uppercase tracking-wider">Real-Time Operations Telemetry Console</span>
               </div>
@@ -1953,7 +1953,7 @@ function App() {
                   { id: "system", label: "SYSTEM" },
                   { id: "ai", label: "AI_MODEL" },
                   { id: "vision", label: "CV_VISION" },
-                  { id: "engine", label: "GRAB_ENG" },
+                  { id: "engine", label: "SENSE_ENG" },
                   { id: "user", label: "ACTIONS" }
                 ].map(tab => (
                   <button
@@ -1961,7 +1961,7 @@ function App() {
                     onClick={() => setLogFilter(tab.id)}
                     className={`px-2 py-1 rounded border transition ${
                       logFilter === tab.id 
-                        ? 'bg-[#00B14F]/10 border-[#00B14F] text-[#CFFF3D] font-bold' 
+                        ? 'bg-[#00E5FF]/10 border-[#00E5FF] text-[#00FFA3] font-bold' 
                         : 'border-white/5 text-slate-500 hover:text-slate-300 hover:border-white/10'
                     }`}
                   >
@@ -1979,11 +1979,11 @@ function App() {
                 filteredLogs.map((log, index) => {
                   let colorClass = "text-slate-300"
                   if (log.includes("SYSTEM:")) colorClass = "text-cyan-400"
-                  if (log.includes("USER EVENT:")) colorClass = "text-[#CFFF3D]"
+                  if (log.includes("USER EVENT:")) colorClass = "text-[#00FFA3]"
                   if (log.includes("AUTOMATED EVENT:")) colorClass = "text-sky-400 font-bold"
-                  if (log.includes("AI MODEL:")) colorClass = "text-[#00B14F]"
-                  if (log.includes("CV ANALYTICS:")) colorClass = "text-emerald-400"
-                  if (log.includes("GRAB ENGINE:")) colorClass = "text-amber-400"
+                  if (log.includes("AI MODEL:")) colorClass = "text-[#00E5FF]"
+                  if (log.includes("CV ANALYTICS:")) colorClass = "text-teal-400"
+                  if (log.includes("Sense Engine:")) colorClass = "text-amber-400"
 
                   return (
                     <div key={index} className={`leading-relaxed border-l-2 pl-2.5 border-white/[0.04] ${colorClass}`}>
